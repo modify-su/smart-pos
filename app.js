@@ -1389,10 +1389,21 @@ function saveFirebaseConfig() {
 function initFirebaseRealtime() {
   if (typeof fbService === 'undefined') return;
 
+  if (typeof fbService.saveProductsToFirebase === 'function' && PRODUCTS_LIST && PRODUCTS_LIST.length) {
+    fbService.saveProductsToFirebase(PRODUCTS_LIST);
+  }
+  if (typeof fbService.saveStockToFirebase === 'function' && DB.stock && DB.stock.length) {
+    fbService.saveStockToFirebase(DB.stock);
+  }
+
   fbService.listenProducts((remoteProducts) => {
     if (remoteProducts && Array.isArray(remoteProducts)) {
-      PRODUCTS_LIST = remoteProducts;
-      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(PRODUCTS_LIST));
+      if (remoteProducts.length > 0) {
+        PRODUCTS_LIST = remoteProducts;
+        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(PRODUCTS_LIST));
+      } else if (PRODUCTS_LIST && PRODUCTS_LIST.length > 0) {
+        fbService.saveProductsToFirebase(PRODUCTS_LIST);
+      }
       if (typeof applyProductFilters === 'function') applyProductFilters();
       if (typeof renderPosProducts === 'function') renderPosProducts();
       if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
@@ -1401,8 +1412,12 @@ function initFirebaseRealtime() {
 
   fbService.listenStock((remoteStock) => {
     if (remoteStock && Array.isArray(remoteStock)) {
-      DB.stock = remoteStock;
-      localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
+      if (remoteStock.length > 0) {
+        DB.stock = remoteStock;
+        localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
+      } else if (DB.stock && DB.stock.length > 0) {
+        fbService.saveStockToFirebase(DB.stock);
+      }
       if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
       if (stockInited && typeof applyFilters === 'function') applyFilters();
     }
@@ -1410,8 +1425,12 @@ function initFirebaseRealtime() {
 
   fbService.listenStorage((remoteStorage) => {
     if (remoteStorage && Array.isArray(remoteStorage)) {
-      DB.storage = remoteStorage;
-      localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
+      if (remoteStorage.length > 0) {
+        DB.storage = remoteStorage;
+        localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
+      } else if (DB.storage && DB.storage.length > 0) {
+        fbService.saveStorageToFirebase(DB.storage);
+      }
       if (whInited && typeof applyWHFilters === 'function') applyWHFilters();
     }
   });

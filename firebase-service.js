@@ -27,10 +27,17 @@ class FirebaseService {
   loadConfig() {
     try {
       const saved = localStorage.getItem('devtai-firebase-config');
-      return saved ? JSON.parse(saved) : DEFAULT_FIREBASE_CONFIG;
-    } catch(e) {
-      return DEFAULT_FIREBASE_CONFIG;
-    }
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        if (parsed.projectId === 'smart-pos-3bfbd' && parsed.databaseURL && parsed.databaseURL.includes('smart-pos-3bfbd')) {
+          return parsed;
+        }
+      }
+    } catch(e) {}
+    try {
+      localStorage.setItem('devtai-firebase-config', JSON.stringify(DEFAULT_FIREBASE_CONFIG));
+    } catch(e) {}
+    return DEFAULT_FIREBASE_CONFIG;
   }
 
   saveConfig(newConfig) {
