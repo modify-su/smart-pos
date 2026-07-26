@@ -1211,39 +1211,9 @@
     </div>
   </div>
 
-  <!-- ═══ MODAL: ตั้งค่า Firebase ═══ -->
-  <div class="modal-overlay" id="fbModal" onclick="closeFBModalBg(event)">
-    <div class="modal-box" style="width:450px">
-      <div class="modal-head">
-        <h3>🔥 ตั้งค่า Firebase Realtime Database</h3>
-        <button class="modal-close-btn" onclick="closeFBModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <p style="font-size:12.5px;color:var(--muted)">กรอก Firebase Config ของคุณเพื่อเชื่อมต่อส่งข้อมูลแบบ Real-time ข้ามอุปกรณ์:</p>
-        <div class="form-field">
-          <label>API Key</label>
-          <input id="fb-apiKey" class="form-inp" placeholder="AIzaSy..." />
-        </div>
-        <div class="form-field">
-          <label>Database URL</label>
-          <input id="fb-dbUrl" class="form-inp" placeholder="https://your-app.firebaseio.com" />
-        </div>
-        <div class="form-field">
-          <label>Project ID</label>
-          <input id="fb-projectId" class="form-inp" placeholder="your-project-id" />
-        </div>
-      </div>
-      <div class="modal-foot">
-        <button class="btn-ghost" onclick="closeFBModal()">ยกเลิก</button>
-        <button class="btn-accent" onclick="saveFirebaseConfig()">บันทึก & เชื่อมต่อ</button>
-      </div>
-    </div>
-  </div>
-
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
-  <script src="firebase-service.js"></script>
   <script src="app.js"></script>
 </body>
 </html>

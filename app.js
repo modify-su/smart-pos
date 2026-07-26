@@ -46,12 +46,6 @@ function saveRealtimeStorage(broadcast = true) {
     localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
     localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
 
-    if (typeof fbService !== 'undefined') {
-      fbService.saveProductsToFirebase(PRODUCTS_LIST);
-      fbService.saveStockToFirebase(DB.stock);
-      fbService.saveStorageToFirebase(DB.storage);
-    }
-
     if (broadcast && realtimeChannel) {
       realtimeChannel.postMessage({ type: 'SYNC_DATA', timestamp: Date.now() });
     }
@@ -1352,89 +1346,7 @@ function onAuthStatusChanged(user) {
 }
 
 // ── Firebase Config Modal ──
-function openFBModal() {
-  const modal = document.getElementById('fbModal');
-  const cfg = (typeof fbService !== 'undefined') ? fbService.config : {};
-  if (document.getElementById('fb-apiKey')) document.getElementById('fb-apiKey').value = cfg.apiKey || '';
-  if (document.getElementById('fb-dbUrl')) document.getElementById('fb-dbUrl').value = cfg.databaseURL || '';
-  if (document.getElementById('fb-projectId')) document.getElementById('fb-projectId').value = cfg.projectId || '';
-  modal?.classList.add('open');
-}
-
-function closeFBModal() {
-  document.getElementById('fbModal')?.classList.remove('open');
-}
-
-function closeFBModalBg(e) {
-  if (e.target === document.getElementById('fbModal')) closeFBModal();
-}
-
-function saveFirebaseConfig() {
-  const apiKey = document.getElementById('fb-apiKey')?.value.trim();
-  const databaseURL = document.getElementById('fb-dbUrl')?.value.trim();
-  const projectId = document.getElementById('fb-projectId')?.value.trim();
-
-  if (!apiKey || !databaseURL) {
-    showToast('⚠️ กรุณากรอก API Key และ Database URL');
-    return;
-  }
-
-  if (typeof fbService !== 'undefined') {
-    fbService.saveConfig({ apiKey, databaseURL, projectId });
-  }
-  closeFBModal();
-  showToast('🔥 บันทึกการตั้งค่า Firebase แล้ว ระบบจะรีโหลดเพื่อเชื่อมต่อ...');
-}
-
-function initFirebaseRealtime() {
-  if (typeof fbService === 'undefined') return;
-
-  if (typeof fbService.saveProductsToFirebase === 'function' && PRODUCTS_LIST && PRODUCTS_LIST.length) {
-    fbService.saveProductsToFirebase(PRODUCTS_LIST);
-  }
-  if (typeof fbService.saveStockToFirebase === 'function' && DB.stock && DB.stock.length) {
-    fbService.saveStockToFirebase(DB.stock);
-  }
-
-  fbService.listenProducts((remoteProducts) => {
-    if (remoteProducts && Array.isArray(remoteProducts)) {
-      if (remoteProducts.length > 0) {
-        PRODUCTS_LIST = remoteProducts;
-        localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(PRODUCTS_LIST));
-      } else if (PRODUCTS_LIST && PRODUCTS_LIST.length > 0) {
-        fbService.saveProductsToFirebase(PRODUCTS_LIST);
-      }
-      if (typeof applyProductFilters === 'function') applyProductFilters();
-      if (typeof renderPosProducts === 'function') renderPosProducts();
-      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
-    }
-  });
-
-  fbService.listenStock((remoteStock) => {
-    if (remoteStock && Array.isArray(remoteStock)) {
-      if (remoteStock.length > 0) {
-        DB.stock = remoteStock;
-        localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
-      } else if (DB.stock && DB.stock.length > 0) {
-        fbService.saveStockToFirebase(DB.stock);
-      }
-      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
-      if (stockInited && typeof applyFilters === 'function') applyFilters();
-    }
-  });
-
-  fbService.listenStorage((remoteStorage) => {
-    if (remoteStorage && Array.isArray(remoteStorage)) {
-      if (remoteStorage.length > 0) {
-        DB.storage = remoteStorage;
-        localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
-      } else if (DB.storage && DB.storage.length > 0) {
-        fbService.saveStorageToFirebase(DB.storage);
-      }
-      if (whInited && typeof applyWHFilters === 'function') applyWHFilters();
-    }
-  });
-}
+// ── Firebase Settings Removed ──
 
 // ═══════════════════════════════════════════════════════════
 //  ORDERS & TIKTOK SHOP OPEN API INTEGRATION
@@ -2777,5 +2689,4 @@ document.addEventListener('DOMContentLoaded', () => {
   applyUserRolePermissions(false);
   initDashboard();
   applyPeriodKPI('today');
-  initFirebaseRealtime();
 });
