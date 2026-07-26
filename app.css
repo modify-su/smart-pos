@@ -1142,3 +1142,51 @@ body.edit-mode-active .m-edit-btn:hover {
 ::-webkit-scrollbar { width:5px; height:5px; }
 ::-webkit-scrollbar-track { background:transparent; }
 ::-webkit-scrollbar-thumb { background:var(--border); border-radius:4px; }
+
+/* ── Firebase Status Badges ── */
+.fb-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 12px;
+  border-radius: 20px;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1px solid var(--border);
+  transition: all 0.2s ease;
+  font-family: var(--font);
+}
+.fb-badge.online {
+  background: #ecfdf5;
+  color: #047857;
+  border-color: #a7f3d0;
+}
+.fb-badge.offline {
+  background: #fff7ed;
+  color: #c2410c;
+  border-color: #ffedd5;
+}
+.fb-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  display: inline-block;
+  transition: transform 0.2s;
+}
+.fb-badge.online .fb-dot {
+  background: #10b981;
+  box-shadow: 0 0 8px #10b981;
+}
+.fb-badge.offline .fb-dot {
+  background: #f97316;
+  box-shadow: 0 0 8px #f97316;
+}
+.fb-pulse {
+  animation: fbPulse 0.6s ease-in-out;
+}
+@keyframes fbPulse {
+  0% { transform: scale(1); }
+  50% { transform: scale(1.4); }
+  100% { transform: scale(1); }
+}

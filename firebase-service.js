@@ -81,18 +81,43 @@ class FirebaseService {
   }
 
   updateConnectionUI(online) {
+    const badgeEl = document.getElementById('fbStatusBadge');
     const statusEl = document.getElementById('fbSettingsStatus');
-    if (statusEl) {
-      if (online) {
-        statusEl.innerHTML = '🟢 เชื่อมต่อคลาวด์สำเร็จแล้ว (Realtime Online)';
-        statusEl.style.color = '#10b981';
-      } else if (this.config) {
-        statusEl.innerHTML = '🟡 กำลังเชื่อมต่อระบบคลาวด์...';
-        statusEl.style.color = '#f59e0b';
-      } else {
-        statusEl.innerHTML = '⚪ ยังไม่ได้บันทึกข้อมูลการเชื่อมต่อ';
-        statusEl.style.color = 'var(--muted)';
+
+    if (online) {
+      if (badgeEl) {
+        badgeEl.className = 'fb-badge online';
+        badgeEl.innerHTML = '<span class="fb-dot"></span> Firebase 🟢';
+        badgeEl.title = 'Firebase Realtime: เชื่อมต่อสำเร็จและซิงค์ข้อมูลเรียลไทม์';
       }
+      if (statusEl) {
+        statusEl.innerHTML = '🟢 เชื่อมต่อคลาวด์สำเร็จและรับส่งข้อมูลเรียลไทม์ (Realtime Online)';
+        statusEl.style.color = '#10b981';
+      }
+    } else {
+      if (badgeEl) {
+        badgeEl.className = 'fb-badge offline';
+        badgeEl.innerHTML = '<span class="fb-dot"></span> Firebase 🟠';
+        badgeEl.title = 'Firebase Realtime: ไม่มีการเชื่อมต่อ หรือ ตัดการเชื่อมต่อ (Offline)';
+      }
+      if (statusEl) {
+        if (this.config) {
+          statusEl.innerHTML = '🟠 ตัดการเชื่อมต่อระบบคลาวด์ หรือ ไม่มีการเชื่อมต่อ (Offline)';
+          statusEl.style.color = '#f97316';
+        } else {
+          statusEl.innerHTML = '⚪ ยังไม่ได้บันทึกข้อมูลการเชื่อมต่อ';
+          statusEl.style.color = 'var(--muted)';
+        }
+      }
+    }
+  }
+
+  notifyDataTransmitted() {
+    const badgeEl = document.getElementById('fbStatusBadge');
+    if (badgeEl && this.isConnected) {
+      badgeEl.classList.remove('fb-pulse');
+      void badgeEl.offsetWidth;
+      badgeEl.classList.add('fb-pulse');
     }
   }
 
@@ -100,6 +125,7 @@ class FirebaseService {
   listenProducts(callback) {
     if (!this.db) return;
     this.db.ref('products_list').on('value', (snap) => {
+      this.notifyDataTransmitted();
       const val = snap.val();
       if (val !== undefined && val !== null) {
         let list = [];
@@ -117,6 +143,7 @@ class FirebaseService {
 
   saveProducts(products) {
     if (this.db) {
+      this.notifyDataTransmitted();
       this.db.ref('products_list').set(products);
     }
   }
@@ -124,6 +151,7 @@ class FirebaseService {
   listenStock(callback) {
     if (!this.db) return;
     this.db.ref('stock_movements').on('value', (snap) => {
+      this.notifyDataTransmitted();
       const val = snap.val();
       if (val !== undefined && val !== null) {
         let list = [];
@@ -141,6 +169,7 @@ class FirebaseService {
 
   saveStock(stock) {
     if (this.db) {
+      this.notifyDataTransmitted();
       this.db.ref('stock_movements').set(stock);
     }
   }
@@ -148,6 +177,7 @@ class FirebaseService {
   listenStorage(callback) {
     if (!this.db) return;
     this.db.ref('storage_locations').on('value', (snap) => {
+      this.notifyDataTransmitted();
       const val = snap.val();
       if (val !== undefined && val !== null) {
         let list = [];
@@ -165,6 +195,7 @@ class FirebaseService {
 
   saveStorage(storage) {
     if (this.db) {
+      this.notifyDataTransmitted();
       this.db.ref('storage_locations').set(storage);
     }
   }
