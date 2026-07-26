@@ -2,6 +2,17 @@
    firebase-service.js — Devtai Shop Realtime Firebase Service
    ============================================================ */
 
+// ── Default Preserved Firebase Config (Auto-connects both Vercel & .exe) ──
+const DEFAULT_FIREBASE_CONFIG = {
+  apiKey: "AIzaSyAIvmdh75hY4nTezqTS18GLB47NtxWE9zM",
+  authDomain: "smart-pos-3bfbd.firebaseapp.com",
+  databaseURL: "https://smart-pos-3bfbd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smart-pos-3bfbd",
+  storageBucket: "smart-pos-3bfbd.firebasestorage.app",
+  messagingSenderId: "1051791600985",
+  appId: "1:1051791600985:web:f7ad3dcc1fc47aeea73048"
+};
+
 class FirebaseService {
   constructor() {
     this.app = null;
@@ -21,7 +32,7 @@ class FirebaseService {
         }
       }
     } catch (e) {}
-    return null;
+    return DEFAULT_FIREBASE_CONFIG;
   }
 
   saveConfig(newConfig) {
