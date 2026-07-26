@@ -4,6 +4,7 @@
   "description": "Smart Stock & POS System — Devtai Shop",
   "main": "main.js",
   "scripts": {
+    "build": "echo 'Static build ready'",
     "dev": "node server.js",
     "server": "node server.js",
     "start": "electron .",
