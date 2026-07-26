@@ -136,9 +136,16 @@ class FirebaseService {
     const prodRef = this.db.ref('products_list');
     prodRef.on('value', (snap) => {
       const val = snap.val();
-      if (val) {
-        let list = Array.isArray(val) ? val : Object.keys(val).map(k => ({ id: k, ...val[k] }));
+      if (val !== undefined && val !== null) {
+        let list = [];
+        if (Array.isArray(val)) {
+          list = val.filter(Boolean);
+        } else if (typeof val === 'object') {
+          list = Object.values(val);
+        }
         callback(list);
+      } else {
+        callback([]);
       }
     });
   }
@@ -167,9 +174,16 @@ class FirebaseService {
     const stockRef = this.db.ref('stock_movements');
     stockRef.on('value', (snap) => {
       const val = snap.val();
-      if (val) {
-        const list = Array.isArray(val) ? val : Object.keys(val).map(key => ({ id: key, ...val[key] }));
+      if (val !== undefined && val !== null) {
+        let list = [];
+        if (Array.isArray(val)) {
+          list = val.filter(Boolean);
+        } else if (typeof val === 'object') {
+          list = Object.values(val);
+        }
         callback(list);
+      } else {
+        callback([]);
       }
     });
   }
@@ -199,9 +213,16 @@ class FirebaseService {
     const storageRef = this.db.ref('storage_locations');
     storageRef.on('value', (snap) => {
       const val = snap.val();
-      if (val) {
-        const list = Array.isArray(val) ? val : Object.keys(val).map(key => ({ id: key, ...val[key] }));
+      if (val !== undefined && val !== null) {
+        let list = [];
+        if (Array.isArray(val)) {
+          list = val.filter(Boolean);
+        } else if (typeof val === 'object') {
+          list = Object.values(val);
+        }
         callback(list);
+      } else {
+        callback([]);
       }
     });
   }
