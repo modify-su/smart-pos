@@ -46,6 +46,12 @@ function saveRealtimeStorage(broadcast = true) {
     localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
     localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
 
+    if (typeof fbService !== 'undefined' && fbService.config) {
+      fbService.saveProducts(PRODUCTS_LIST);
+      fbService.saveStock(DB.stock);
+      fbService.saveStorage(DB.storage);
+    }
+
     if (broadcast && realtimeChannel) {
       realtimeChannel.postMessage({ type: 'SYNC_DATA', timestamp: Date.now() });
     }
@@ -1345,8 +1351,69 @@ function onAuthStatusChanged(user) {
   if (avImg) avImg.src = `https://ui-avatars.com/api/?name=${encodeURIComponent(name)}&background=ff9800&color=fff&size=64`;
 }
 
-// ── Firebase Config Modal ──
-// ── Firebase Settings Removed ──
+// ── Firebase Cloud Settings & Realtime Engine ──
+function populateFirebaseSettingsUI() {
+  if (typeof fbService === 'undefined' || !fbService.config) return;
+  const cfg = fbService.config;
+  if (document.getElementById('fb-apiKey-inp')) document.getElementById('fb-apiKey-inp').value = cfg.apiKey || '';
+  if (document.getElementById('fb-dbUrl-inp')) document.getElementById('fb-dbUrl-inp').value = cfg.databaseURL || '';
+  if (document.getElementById('fb-projectId-inp')) document.getElementById('fb-projectId-inp').value = cfg.projectId || '';
+}
+
+function saveFirebaseConfigFromSettings() {
+  const apiKey = document.getElementById('fb-apiKey-inp')?.value.trim();
+  const databaseURL = document.getElementById('fb-dbUrl-inp')?.value.trim();
+  const projectId = document.getElementById('fb-projectId-inp')?.value.trim();
+
+  if (!apiKey || !databaseURL) {
+    showToast('⚠️ กรุณากรอก API Key และ Database URL ให้ครบถ้วน');
+    return;
+  }
+
+  if (typeof fbService !== 'undefined') {
+    fbService.saveConfig({ apiKey, databaseURL, projectId });
+  }
+  showToast('🔥 บันทึกและเชื่อมต่อระบบคลาวด์เรียบร้อยแล้ว ระบบกำลังโหลดใหม่...');
+}
+
+function clearFirebaseConfigFromSettings() {
+  if (confirm('คุณต้องการล้างค่าการเชื่อมต่อ Firebase หรือไม่? (ระบบจะเปลี่ยนกลับเป็นโหมด Offline)')) {
+    if (typeof fbService !== 'undefined') {
+      fbService.clearConfig();
+    }
+  }
+}
+
+function initFirebaseRealtime() {
+  if (typeof fbService === 'undefined' || !fbService.config) return;
+
+  fbService.listenProducts((remoteProducts) => {
+    if (remoteProducts && Array.isArray(remoteProducts) && remoteProducts.length) {
+      PRODUCTS_LIST = remoteProducts;
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(PRODUCTS_LIST));
+      if (typeof applyProductFilters === 'function') applyProductFilters();
+      if (typeof renderPosProducts === 'function') renderPosProducts();
+      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
+    }
+  });
+
+  fbService.listenStock((remoteStock) => {
+    if (remoteStock && Array.isArray(remoteStock) && remoteStock.length) {
+      DB.stock = remoteStock;
+      localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
+      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
+      if (stockInited && typeof applyFilters === 'function') applyFilters();
+    }
+  });
+
+  fbService.listenStorage((remoteStorage) => {
+    if (remoteStorage && Array.isArray(remoteStorage) && remoteStorage.length) {
+      DB.storage = remoteStorage;
+      localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
+      if (whInited && typeof applyWHFilters === 'function') applyWHFilters();
+    }
+  });
+}
 
 // ═══════════════════════════════════════════════════════════
 //  ORDERS & TIKTOK SHOP OPEN API INTEGRATION
@@ -2689,4 +2756,6 @@ document.addEventListener('DOMContentLoaded', () => {
   applyUserRolePermissions(false);
   initDashboard();
   applyPeriodKPI('today');
+  initFirebaseRealtime();
+  populateFirebaseSettingsUI();
 });

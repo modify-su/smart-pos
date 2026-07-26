@@ -667,24 +667,31 @@
                 <span>เพิ่ม user, กำหนดบทบาทและสิทธิ์การเข้าถึง</span>
               </div>
             </button>
+            <button class="st-tab" onclick="switchSettingsTab('firebase', this)">
+              <span class="st-tab-icon">🔥</span>
+              <div class="st-tab-txt">
+                <strong>2. ระบบคลาวด์ Firebase Sync (เรียลไทม์)</strong>
+                <span>เชื่อมต่อฐานข้อมูล Realtime Database ซิงค์ข้อมูลข้ามอุปกรณ์</span>
+              </div>
+            </button>
             <button class="st-tab" onclick="switchSettingsTab('linebot', this)">
               <span class="st-tab-icon">💬</span>
               <div class="st-tab-txt">
-                <strong>2. LINE Bot & แจ้งเตือน</strong>
+                <strong>3. LINE Bot & แจ้งเตือน</strong>
                 <span>ตั้งค่า Token, Webhook และการแจ้งเตือนสต็อก</span>
               </div>
             </button>
             <button class="st-tab" onclick="switchSettingsTab('backup', this)">
               <span class="st-tab-icon">💾</span>
               <div class="st-tab-txt">
-                <strong>3. สำรองข้อมูล (Backup)</strong>
+                <strong>4. สำรองข้อมูล (Backup)</strong>
                 <span>ส่งออก JSON/CSV และการนำเข้าคืนค่าข้อมูล</span>
               </div>
             </button>
             <button class="st-tab" onclick="switchSettingsTab('autoupdate', this)">
               <span class="st-tab-icon">🚀</span>
               <div class="st-tab-txt">
-                <strong>4. ระบบอัปเดตอัตโนมัติ (Auto-Update Channel)</strong>
+                <strong>5. ระบบอัปเดตอัตโนมัติ (Auto-Update Channel)</strong>
                 <span>ตรวจสอบเวอร์ชันใหม่ ซิงค์และอัปเดตผ่าน Cloud / GitHub</span>
               </div>
             </button>
@@ -722,7 +729,46 @@
             </div>
           </div>
 
-          <!-- Section 2: LINE Bot -->
+          <!-- Section 2: Firebase Cloud Sync -->
+          <div class="st-section" id="st-sec-firebase">
+            <div class="card-header-bar">
+              <div>
+                <h3>🔥 ตั้งค่าการเชื่อมต่อคลาวด์ Firebase Realtime Database</h3>
+                <p class="sub-txt">เชื่อมต่อระบบคลาวด์เพื่อซิงค์ข้อมูลสินค้า ยอดขาย และสต็อกข้ามอุปกรณ์แบบ Real-time</p>
+              </div>
+            </div>
+
+            <div class="card" style="max-width:650px">
+              <div style="background:var(--light);padding:14px 18px;border-radius:12px;margin-bottom:20px;border:1px solid var(--border)">
+                <div style="font-weight:700;font-size:13.5px;color:var(--text);margin-bottom:4px">📡 สถานะการเชื่อมต่อคลาวด์ปัจจุบัน:</div>
+                <span id="fbSettingsStatus" style="font-size:13px;font-weight:600;color:var(--muted)">⚪ ยังไม่ได้บันทึกข้อมูลการเชื่อมต่อ</span>
+              </div>
+
+              <div class="form-field">
+                <label>API Key <span style="color:var(--red)">*</span></label>
+                <input id="fb-apiKey-inp" class="form-inp" placeholder="เช่น AIzaSy..." />
+              </div>
+              <div class="form-field">
+                <label>Database URL <span style="color:var(--red)">*</span></label>
+                <input id="fb-dbUrl-inp" class="form-inp" placeholder="เช่น https://your-project-default-rtdb.asia-southeast1.firebasedatabase.app" />
+              </div>
+              <div class="form-field">
+                <label>Project ID <span style="color:var(--red)">*</span></label>
+                <input id="fb-projectId-inp" class="form-inp" placeholder="เช่น your-project-id" />
+              </div>
+
+              <div style="display:flex;gap:10px;margin-top:20px">
+                <button class="btn-accent" onclick="saveFirebaseConfigFromSettings()" style="padding:10px 20px;font-weight:700">
+                  💾 บันทึกและเชื่อมต่อระบบคลาวด์
+                </button>
+                <button class="btn-ghost" onclick="clearFirebaseConfigFromSettings()" style="padding:10px 16px;color:var(--red)">
+                  🗑️ ล้างค่าการเชื่อมต่อ
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: LINE Bot -->
           <div class="st-section" id="st-sec-linebot">
             <div class="card" style="margin-bottom:16px">
               <h3>💬 ตั้งค่า LINE Messaging API & Notify</h3>
@@ -1214,6 +1260,10 @@
   <!-- Toast -->
   <div class="toast" id="toast"></div>
 
+  <!-- Firebase Compatibility SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <script src="firebase-service.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
