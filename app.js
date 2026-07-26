@@ -46,8 +46,10 @@ function saveRealtimeStorage(broadcast = true) {
     localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
     localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
 
-    if (typeof fbService !== 'undefined' && fbService.isConnected) {
+    if (typeof fbService !== 'undefined') {
       fbService.saveProductsToFirebase(PRODUCTS_LIST);
+      fbService.saveStockToFirebase(DB.stock);
+      fbService.saveStorageToFirebase(DB.storage);
     }
 
     if (broadcast && realtimeChannel) {
@@ -1388,25 +1390,29 @@ function initFirebaseRealtime() {
   if (typeof fbService === 'undefined') return;
 
   fbService.listenProducts((remoteProducts) => {
-    if (remoteProducts && Array.isArray(remoteProducts) && remoteProducts.length) {
+    if (remoteProducts && Array.isArray(remoteProducts)) {
       PRODUCTS_LIST = remoteProducts;
+      localStorage.setItem(STORAGE_KEYS.PRODUCTS, JSON.stringify(PRODUCTS_LIST));
       if (typeof applyProductFilters === 'function') applyProductFilters();
       if (typeof renderPosProducts === 'function') renderPosProducts();
+      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
     }
   });
 
   fbService.listenStock((remoteStock) => {
-    if (remoteStock && remoteStock.length) {
+    if (remoteStock && Array.isArray(remoteStock)) {
       DB.stock = remoteStock;
-      refreshDashboardFromDB();
-      if (stockInited) applyFilters();
+      localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
+      if (typeof refreshDashboardFromDB === 'function') refreshDashboardFromDB();
+      if (stockInited && typeof applyFilters === 'function') applyFilters();
     }
   });
 
   fbService.listenStorage((remoteStorage) => {
-    if (remoteStorage && remoteStorage.length) {
+    if (remoteStorage && Array.isArray(remoteStorage)) {
       DB.storage = remoteStorage;
-      if (whInited) applyWHFilters();
+      localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
+      if (whInited && typeof applyWHFilters === 'function') applyWHFilters();
     }
   });
 }

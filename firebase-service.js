@@ -144,8 +144,20 @@ class FirebaseService {
   }
 
   saveProductsToFirebase(products) {
-    if (this.db && this.isConnected) {
+    if (this.db) {
       this.db.ref('products_list').set(products);
+    }
+  }
+
+  saveStockToFirebase(stock) {
+    if (this.db) {
+      this.db.ref('stock_movements').set(stock);
+    }
+  }
+
+  saveStorageToFirebase(storage) {
+    if (this.db) {
+      this.db.ref('storage_locations').set(storage);
     }
   }
 
@@ -156,27 +168,27 @@ class FirebaseService {
     stockRef.on('value', (snap) => {
       const val = snap.val();
       if (val) {
-        const list = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+        const list = Array.isArray(val) ? val : Object.keys(val).map(key => ({ id: key, ...val[key] }));
         callback(list);
       }
     });
   }
 
   pushStock(entry) {
-    if (this.db && this.isConnected) {
+    if (this.db) {
       const stockRef = this.db.ref('stock_movements');
       stockRef.push(entry);
     }
   }
 
   updateStock(id, data) {
-    if (this.db && this.isConnected && id) {
+    if (this.db && id) {
       this.db.ref(`stock_movements/${id}`).update(data);
     }
   }
 
   deleteStock(id) {
-    if (this.db && this.isConnected && id) {
+    if (this.db && id) {
       this.db.ref(`stock_movements/${id}`).remove();
     }
   }
@@ -188,27 +200,27 @@ class FirebaseService {
     storageRef.on('value', (snap) => {
       const val = snap.val();
       if (val) {
-        const list = Object.keys(val).map(key => ({ id: key, ...val[key] }));
+        const list = Array.isArray(val) ? val : Object.keys(val).map(key => ({ id: key, ...val[key] }));
         callback(list);
       }
     });
   }
 
   pushStorage(entry) {
-    if (this.db && this.isConnected) {
+    if (this.db) {
       const storageRef = this.db.ref('storage_locations');
       storageRef.push(entry);
     }
   }
 
   updateStorage(id, data) {
-    if (this.db && this.isConnected && id) {
+    if (this.db && id) {
       this.db.ref(`storage_locations/${id}`).update(data);
     }
   }
 
   deleteStorage(id) {
-    if (this.db && this.isConnected && id) {
+    if (this.db && id) {
       this.db.ref(`storage_locations/${id}`).remove();
     }
   }
