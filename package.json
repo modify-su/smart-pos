@@ -1,0 +1,54 @@
+{
+  "name": "smart-stock-pos",
+  "version": "1.0.0",
+  "description": "Smart Stock & POS System — Devtai Shop",
+  "main": "main.js",
+  "scripts": {
+    "dev": "node server.js",
+    "server": "node server.js",
+    "start": "electron .",
+    "pack": "electron-packager . \"Smart Stock POS\" --platform=win32 --arch=x64 --out=dist --overwrite",
+    "dist": "electron-packager . \"Smart Stock POS\" --platform=win32 --arch=x64 --out=dist --overwrite"
+  },
+  "keywords": [
+    "pos",
+    "stock",
+    "electron"
+  ],
+  "author": "devtai code",
+  "license": "MIT",
+  "build": {
+    "appId": "com.devtai.smartstockpos",
+    "productName": "Smart Stock POS",
+    "directories": {
+      "output": "dist"
+    },
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Smart Stock POS"
+    },
+    "files": [
+      "**/*",
+      "!dist/**/*",
+      "!.git/**/*"
+    ]
+  },
+  "devDependencies": {
+    "electron": "^28.3.3",
+    "electron-builder": "^24.13.3",
+    "electron-packager": "^17.1.2"
+  }
+}

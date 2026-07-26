@@ -1,0 +1,1249 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devtai Shop</title>
+  <meta name="description" content="ระบบจัดการร้านค้า Devtai Shop — แดชบอร์ดและประวัติสต็อก" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@300;400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- Firebase Web SDK v10 -->
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+  <link rel="stylesheet" href="app.css" />
+</head>
+<body>
+
+  <!-- ═══ SIDEBAR ═══ -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-mark">D</div>
+        <div class="logo-words">
+          <span class="logo-brand">Devtai</span>
+          <span class="logo-sub">Shop</span>
+        </div>
+      </div>
+      <button class="collapse-btn" id="collapseBtn">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <nav class="nav" id="sideNav">
+      <div class="nav-group-label">ระบบร้านค้า</div>
+
+      <a class="nav-link active" data-view="dashboard" onclick="navigate('dashboard')">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <span class="m-txt" id="m-text-dashboard">แดชบอร์ด</span>
+        <button class="m-edit-btn" onclick="openMenuEdit(event, 'dashboard')" title="เปลี่ยนชื่อเมนู">✏️</button>
+      </a>
+
+      <!-- POS Store Register Menu -->
+      <a class="nav-link" data-view="pos" onclick="navigate('pos')">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="4" width="20" height="16" rx="2"/><line x1="6" y1="8" x2="6" y2="8.01"/><line x1="10" y1="8" x2="10" y2="8.01"/><line x1="14" y1="8" x2="14" y2="8.01"/><line x1="18" y1="8" x2="18" y2="8.01"/><line x1="6" y1="12" x2="6" y2="12.01"/><line x1="10" y1="12" x2="10" y2="12.01"/><line x1="14" y1="12" x2="14" y2="12.01"/><line x1="18" y1="12" x2="18" y2="12.01"/><line x1="6" y1="16" x2="18" y2="16"/></svg>
+        <span class="m-txt" id="m-text-pos">ระบบขายหน้าร้าน (POS)</span>
+        <button class="m-edit-btn" onclick="openMenuEdit(event, 'pos')" title="เปลี่ยนชื่อเมนู">✏️</button>
+      </a>
+
+      <a class="nav-link" data-view="products" onclick="navigate('products')">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <span class="m-txt" id="m-text-products">สินค้า</span>
+        <button class="m-edit-btn" onclick="openMenuEdit(event, 'products')" title="เปลี่ยนชื่อเมนู">✏️</button>
+      </a>
+
+      <!-- คลังสินค้า (Menu Group with Sub-items) -->
+      <div class="nav-item-group open" id="nav-group-stock">
+        <div class="nav-link" id="nav-stock-header" onclick="toggleNavGroup('stock')">
+          <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
+          <span class="m-txt" id="m-text-stock">คลังสินค้า</span>
+          <button class="m-edit-btn" onclick="openMenuEdit(event, 'stock')" title="เปลี่ยนชื่อเมนู">✏️</button>
+          <svg class="nav-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>
+        </div>
+        <div class="nav-sub-items" id="sub-items-stock">
+          <div class="sub-item-row">
+            <a class="nav-sub-item" data-view="warehouse" onclick="navigate('warehouse')">
+              <span class="m-txt" id="m-text-warehouse">พื้นที่จัดเก็บ (โกดัง)</span>
+            </a>
+            <button class="m-edit-btn" onclick="openMenuEdit(event, 'warehouse')" title="เปลี่ยนชื่อเมนูย่อย">✏️</button>
+          </div>
+          <div class="sub-item-row">
+            <a class="nav-sub-item" data-view="stock" onclick="navigate('stock')">
+              <span class="m-txt" id="m-text-history">ประวัติการเคลื่อนไหว</span>
+            </a>
+            <button class="m-edit-btn" onclick="openMenuEdit(event, 'history')" title="เปลี่ยนชื่อเมนูย่อย">✏️</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="nav-divider" id="settingsNavDivider"></div>
+      <div class="nav-group-label" id="settingsNavGroupLabel">การจัดการ</div>
+
+      <a class="nav-link" data-view="settings" onclick="navigate('settings')">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span class="m-txt" id="m-text-settings">ตั้งค่าระบบ</span>
+        <button class="m-edit-btn" onclick="openMenuEdit(event, 'settings')" title="เปลี่ยนชื่อเมนู">✏️</button>
+      </a>
+    </nav>
+
+    <div class="sidebar-edit-toggle">
+      <label class="toggle-switch" title="เปิด/ปิดโหมดแก้ไขชื่อเมนู">
+        <input type="checkbox" id="toggleEditMode" onchange="toggleMenuEditMode(this.checked)" />
+        <span class="toggle-slider"></span>
+      </label>
+      <span class="toggle-label">แก้ไขชื่อเมนู</span>
+    </div>
+
+    <div class="sidebar-user" style="flex-direction:column;align-items:stretch;gap:8px">
+      <div style="display:flex;align-items:center;gap:10px">
+        <img src="https://ui-avatars.com/api/?name=Admin&background=ff9800&color=fff&size=64" id="sidebarAvImg" class="user-av" alt="user" />
+        <div class="user-info" style="flex:1;min-width:0">
+          <p class="user-name" id="sidebarUserName" style="margin:0;font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">ผู้ดูแลระบบ (Admin)</p>
+          <p class="user-role" id="sidebarUserRole" style="margin:0;font-size:10.5px;color:var(--muted)">Administrator</p>
+        </div>
+        <button class="btn-logout-orange" onclick="logoutUser(event)" title="ออกจากระบบ">
+          <svg viewBox="0 0 100 100" width="24" height="24">
+            <circle cx="50" cy="50" r="50" fill="#FF9800"/>
+            <path d="M 32 28 H 58 V 43 H 50 V 36 H 40 V 64 H 50 V 57 H 58 V 72 H 32 Z" fill="#FFFFFF"/>
+            <path d="M 46 45 H 64 V 37 L 78 50 L 64 63 V 55 H 46 Z" fill="#FFFFFF"/>
+          </svg>
+        </button>
+      </div>
+
+      <!-- User Role Display Badge -->
+      <div id="userRoleBadge" style="background:#fff7ed;border-radius:8px;padding:6px 10px;display:flex;align-items:center;justify-content:center;font-size:11.5px;font-weight:700;color:#c2410c;border:1px solid #ffedd5">
+        👑 ผู้ดูแลระบบ (Admin)
+      </div>
+    </div>
+  </aside>
+
+  <!-- Sidebar Backdrop for Mobile/Tablet -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop" onclick="closeMobileSidebar()"></div>
+
+  <!-- ═══ MAIN ═══ -->
+  <div class="main" id="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left" id="topbarLeft">
+        <button class="mobile-menu-btn" id="mobileMenuBtn" onclick="toggleMobileSidebar()" title="เปิด/ปิดเมนูหลัก">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg>
+        </button>
+        <div>
+          <h1 class="page-heading" id="pageHeading">แดชบอร์ด</h1>
+        </div>
+      </div>
+      <div class="topbar-right">
+        <!-- Period (dashboard only) -->
+        <div class="period-group" id="periodGroup">
+          <button class="period-btn active" onclick="switchPeriod('today',this)">วันนี้</button>
+          <button class="period-btn" onclick="switchPeriod('week',this)">7 วัน</button>
+          <button class="period-btn" onclick="switchPeriod('month',this)">30 วัน</button>
+        </div>
+        <!-- Clear Dashboard / Reset Button -->
+        <button class="icon-btn text-btn" id="btnClearDash" onclick="openResetModal()" title="เคลียร์ข้อมูลแดชบอร์ด / รีเซ็ต">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18"/><path d="M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></svg>
+          <span class="btn-lbl">เคลียร์ข้อมูล</span>
+        </button>
+        <!-- Firebase Realtime Status Badge -->
+        <button class="fb-badge offline" id="fbStatusBadge" onclick="openFBModal()" title="ตั้งค่า Firebase Realtime Sync">
+          <span class="fb-dot"></span> Firebase 🟠
+        </button>
+        <button class="icon-btn" id="themeBtn" title="สลับธีม">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <button class="icon-btn" style="position:relative">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+        <div class="topbar-avatar" id="topbarAvatar">
+          <img src="https://ui-avatars.com/api/?name=Admin&background=ff9800&color=fff&size=64" id="userAvImg" class="av-img" alt="user" />
+          <span class="av-name" id="userDisplayName">ผู้ดูแลระบบ (Admin)</span>
+          <button class="btn-logout-orange" onclick="logoutUser(event)" title="ออกจากระบบ">
+            <svg viewBox="0 0 100 100" width="26" height="26">
+              <circle cx="50" cy="50" r="50" fill="#FF9800"/>
+              <path d="M 32 28 H 58 V 43 H 50 V 36 H 40 V 64 H 50 V 57 H 58 V 72 H 32 Z" fill="#FFFFFF"/>
+              <path d="M 46 45 H 64 V 37 L 78 50 L 64 63 V 55 H 46 Z" fill="#FFFFFF"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ VIEW CONTAINER ═══ -->
+    <div class="view-wrap" id="viewWrap">
+
+      <!-- ─── VIEW: DASHBOARD ─── -->
+      <div class="view active" id="view-dashboard">
+        <div class="content">
+
+          <!-- KPI -->
+          <div class="kpi-row">
+            <div class="kpi-card">
+              <p class="kpi-label">ยอดขายรวม</p>
+              <h2 class="kpi-value" id="kv-rev">฿48,250</h2>
+              <p class="kpi-delta up" id="kd-rev">↑ 12.4% จากเมื่อวาน</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">คำสั่งซื้อ</p>
+              <h2 class="kpi-value" id="kv-ord">134</h2>
+              <p class="kpi-delta up" id="kd-ord">↑ 8.1% จากเมื่อวาน</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">รายการสต็อก</p>
+              <h2 class="kpi-value" id="kv-stk">—</h2>
+              <p class="kpi-delta neutral" id="kd-stk">คำนวณจากข้อมูลจริง</p>
+            </div>
+            <div class="kpi-card">
+              <p class="kpi-label">ลูกค้าใหม่</p>
+              <h2 class="kpi-value" id="kv-cus">28</h2>
+              <p class="kpi-delta up" id="kd-cus">↑ 5.3% จากเมื่อวาน</p>
+            </div>
+          </div>
+
+          <!-- Charts Row -->
+          <div class="charts-row">
+            <!-- Line -->
+            <div class="card card-wide">
+              <div class="card-header">
+                <p class="card-title">แนวโน้มยอดขาย</p>
+                <div style="display:flex;gap:14px">
+                  <span class="legend-pill" style="--cc:#4a90d9">● ยอดขาย</span>
+                  <span class="legend-pill" style="--cc:#f4a259">● ออเดอร์</span>
+                </div>
+              </div>
+              <div class="line-wrap"><canvas id="lineChart"></canvas></div>
+            </div>
+
+            <!-- Donut -->
+            <div class="card">
+              <p class="card-title">ยอดขายตามหมวดหมู่</p>
+              <div class="donut-wrap">
+                <canvas id="donutChart" width="200" height="200"></canvas>
+                <div class="donut-center">
+                  <p class="donut-total" id="donutTotalLabel">฿312k</p>
+                  <p class="donut-sub">รวม</p>
+                </div>
+              </div>
+              <div id="donutLegend" class="donut-legend"></div>
+            </div>
+          </div>
+
+          <!-- Bottom Row -->
+          <div class="charts-row">
+            <!-- Top products from shared data -->
+            <div class="card">
+              <div class="card-header">
+                <p class="card-title">สินค้าขายดี</p>
+              </div>
+              <div class="prod-list" id="prodList"></div>
+            </div>
+
+            <!-- Recent stock movements from shared data -->
+            <div class="card card-wide">
+              <div class="card-header">
+                <p class="card-title">ความเคลื่อนไหวสต็อกล่าสุด</p>
+                <a class="link-more" onclick="navigate('stock')">ดูทั้งหมด →</a>
+              </div>
+              <table class="mini-table">
+                <thead>
+                  <tr><th>วันที่</th><th>สินค้า</th><th>โกดัง</th><th>ประเภท</th><th>จำนวน</th></tr>
+                </thead>
+                <tbody id="recentStockBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── VIEW: STOCK ─── -->
+      <div class="view" id="view-stock">
+        <div class="content">
+
+          <!-- Stats -->
+          <div class="kpi-row" id="stockStats"></div>
+
+          <!-- Filter -->
+          <div class="filter-bar">
+            <div class="filter-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="srch" type="text" placeholder="ชื่อสินค้า, SKU หรือหมายเหตุ…" oninput="applyFilters()" />
+            </div>
+            <select id="fType" onchange="applyFilters()" class="filter-sel">
+              <option value="">ทุกประเภท</option>
+              <option>ขายสินค้า</option><option>รับเข้า</option><option>โอนย้าย</option><option>ปรับยอด</option>
+            </select>
+            <select id="fWH" onchange="applyFilters()" class="filter-sel">
+              <option value="">ทุกคลัง</option>
+              <option>Bangkok Main Warehouse</option>
+              <option>Chiang Mai Warehouse</option>
+            </select>
+            <input id="fFrom" type="date" class="filter-date" onchange="applyFilters()" />
+            <input id="fTo"   type="date" class="filter-date" onchange="applyFilters()" />
+            <button class="icon-btn" onclick="resetFilters()" title="ล้างตัวกรอง">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            </button>
+            <button class="icon-btn" onclick="exportCSV()" title="Export CSV">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="table-topbar">
+              <span id="tableCount" class="table-info-txt">แสดง 0 รายการ</span>
+            </div>
+            <div class="tbl-wrap">
+              <table class="data-tbl">
+                <thead>
+                  <tr>
+                    <th class="sortable" onclick="sortBy('date')">วันที่/เวลา <span class="sort-icon">↕</span></th>
+                    <th>สินค้า / Variant</th>
+                    <th>โกดัง</th>
+                    <th>ประเภท</th>
+                    <th class="text-c sortable" onclick="sortBy('qty')">จำนวน <span class="sort-icon">↕</span></th>
+                    <th>ผู้บันทึก</th>
+                    <th>อ้างอิง</th>
+                    <th class="text-c">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="stockBody"></tbody>
+              </table>
+            </div>
+            <!-- Pagination -->
+            <div class="pagi" id="pagi"></div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── VIEW: WAREHOUSE / STORAGE LOCATIONS ─── -->
+      <div class="view" id="view-warehouse">
+        <div class="content">
+
+          <!-- Stats -->
+          <div class="kpi-row" id="whStats"></div>
+
+          <!-- Filter -->
+          <div class="filter-bar">
+            <div class="filter-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="whSrch" type="text" placeholder="ค้นหาหมวดหมู่, พื้นที่จัดเก็บ, ชื่อสินค้า…" oninput="applyWHFilters()" />
+            </div>
+            <select id="whFCat" onchange="applyWHFilters()" class="filter-sel">
+              <option value="">ทุกหมวดหมู่</option>
+              <option>เสื้อยืด</option><option>หมวก</option><option>เสื้อโปโล</option><option>ฮูดดี้</option>
+            </select>
+            <select id="whFLoc" onchange="applyWHFilters()" class="filter-sel">
+              <option value="">ทุกคลังสินค้า</option>
+              <option>Bangkok Main Warehouse</option>
+              <option>Chiang Mai Warehouse</option>
+            </select>
+            <button class="icon-btn" onclick="resetWHFilters()" title="ล้างตัวกรอง">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 102.13-9.36L1 10"/></svg>
+            </button>
+            <button class="btn-accent" onclick="openWHModal()">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+              เพิ่มจุดจัดเก็บ
+            </button>
+          </div>
+
+          <!-- Table -->
+          <div class="card" style="padding:0;overflow:hidden">
+            <div class="table-topbar">
+              <span id="whTableCount" class="table-info-txt">แสดง 0 รายการ</span>
+            </div>
+            <div class="tbl-wrap">
+              <table class="data-tbl">
+                <thead>
+                  <tr>
+                    <th>หมวดหมู่สินค้า</th>
+                    <th>พื้นที่จัดเก็บ</th>
+                    <th>ชื่อสินค้า</th>
+                    <th class="text-c">จำนวน</th>
+                    <th class="text-c">หน่วยนับ</th>
+                    <th class="text-c">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="whTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── VIEW: POS (Enterprise Custom Accounting POS Layout) ─── -->
+      <div class="view" id="view-pos">
+        <div class="content" style="padding:16px 24px">
+          
+          <!-- Top Header Section -->
+          <div style="margin-bottom:20px">
+            <h2 style="font-size:22px;font-weight:800;color:#1e293b;margin:0;letter-spacing:-0.5px">ระบบขายสินค้าและบริการหน้าร้าน (POS)</h2>
+            <p style="font-size:13px;color:#64748b;margin:4px 0 0 0">เลือกสินค้า ชำระเงิน รวดเร็วและบันทึกรายรับของบริษัททันที</p>
+          </div>
+
+          <!-- Main Layout Grid: Left = Product Cards, Right = Order Summary -->
+          <div class="ent-pos-grid">
+            
+            <!-- LEFT SIDE: Product Cards Grid -->
+            <div class="ent-pos-left">
+              <div class="ent-prod-cards-wrap" id="posProductGrid"></div>
+            </div>
+
+            <!-- RIGHT SIDE: Order Summary Card -->
+            <div class="ent-pos-right">
+              <div class="ent-cart-card">
+                
+                <!-- Cart Title -->
+                <div style="display:flex;align-items:center;gap:8px;font-weight:800;font-size:16px;color:#1e293b;margin-bottom:16px">
+                  <span style="color:#6366f1">🛒</span>
+                  <span>รายการสั่งซื้อ</span>
+                </div>
+
+                <!-- Items Scroll List -->
+                <div class="ent-cart-items" id="posCartItems"></div>
+
+                <!-- Calculation Summary Section -->
+                <div class="ent-cart-summary">
+                  <div class="ent-sum-row">
+                    <span>ราคารวมสินค้า:</span>
+                    <strong id="posSubtotalDisplay">0.00</strong>
+                  </div>
+                  <div class="ent-sum-row sub-vat">
+                    <span>ภาษีมูลค่าเพิ่มในราคาสินค้า (VAT 7%):</span>
+                    <span id="posVatDisplay">0.00</span>
+                  </div>
+                  <div class="ent-sum-row sub-vat">
+                    <span>ราคาก่อนภาษี (Net Total):</span>
+                    <span id="posPreVatDisplay">0.00</span>
+                  </div>
+                  <div class="ent-sum-row grand-total-row">
+                    <span>ยอดชำระสุทธิ:</span>
+                    <strong id="posGrandTotalDisplay">0.00</strong>
+                  </div>
+                </div>
+
+                <!-- Payment Method Radio Option -->
+                <div class="ent-payment-sec">
+                  <div style="font-size:12px;font-weight:700;color:#64748b;margin-bottom:8px">วิธีการชำระเงิน</div>
+                  <div class="ent-radio-group">
+                    <label class="ent-radio-label">
+                      <input type="radio" name="entPayMethod" value="cash" checked onchange="setPosPayMethod('cash', this)" />
+                      <span>เงินสด (Cash)</span>
+                    </label>
+                    <label class="ent-radio-label">
+                      <input type="radio" name="entPayMethod" value="qr" onchange="setPosPayMethod('qr', this)" />
+                      <span>เงินโอน / PromptPay QR</span>
+                    </label>
+                  </div>
+
+                  <!-- Cash received field -->
+                  <div id="entCashInpWrap" style="margin-top:12px">
+                    <label style="font-size:11.5px;color:#64748b;display:block;margin-bottom:4px">จำนวนเงินที่ได้รับ (บาท)</label>
+                    <input id="posCashReceived" type="number" class="form-inp ent-cash-inp" placeholder="รับเงินสด..." oninput="updatePosTotals()" />
+                  </div>
+                </div>
+
+                <!-- Green Submit Button -->
+                <button class="ent-submit-btn" onclick="checkoutPosOrder()">
+                  บันทึกการขาย & พิมพ์ใบเสร็จย่อ
+                </button>
+
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </div>
+
+      <!-- ─── VIEW: PRODUCTS (รายการสินค้า & ราคาเชื่อมโยง POS) ─── -->
+      <div class="view" id="view-products">
+        <div class="content">
+
+          <!-- Products Header Bar -->
+          <div class="card-header-bar" style="background:var(--surface);padding:14px 18px;border-radius:14px;border:1px solid var(--border)">
+            <div style="display:flex;align-items:center;gap:12px">
+              <span style="font-size:24px">📦</span>
+              <div>
+                <h3 style="font-size:15px;margin:0">รายการสินค้าและการตั้งราคา (Product Catalog & Pricing)</h3>
+                <span style="font-size:12px;color:var(--muted)">จัดการข้อมูลสินค้า ราคาขายหน้าร้าน POS, ราคาขายออนไลน์ และส่วนลด พร้อมเชื่อมโยงระบบขายหน้าร้านอัตโนมัติ</span>
+              </div>
+            </div>
+            <div style="display:flex;gap:10px;align-items:center">
+              <button class="btn-accent" onclick="openAddProductModal()">
+                ➕ เพิ่มสินค้าใหม่
+              </button>
+            </div>
+          </div>
+
+          <!-- 4-Card Summary KPI Bar (Matching User Screenshot) -->
+          <div class="kpi-row" id="prodKpiStats" style="margin-top:14px">
+            <div class="kpi-card" style="border-top:4px solid #4a90d9;background:var(--surface);border-radius:12px;padding:14px 18px">
+              <p class="kpi-label" style="font-size:11.5px;color:var(--muted);margin-bottom:4px">จุดจัดเก็บทั้งหมด</p>
+              <h2 class="kpi-value" id="prodKpiWh" style="font-size:22px;font-weight:800;color:var(--text);margin:0">1</h2>
+              <p class="kpi-delta neutral" style="font-size:11px;color:var(--muted);margin-top:2px">พื้นที่</p>
+            </div>
+            <div class="kpi-card" style="border-top:4px solid #6c5ce7;background:var(--surface);border-radius:12px;padding:14px 18px">
+              <p class="kpi-label" style="font-size:11.5px;color:var(--muted);margin-bottom:4px">หมวดหมู่สินค้า</p>
+              <h2 class="kpi-value" id="prodKpiCat" style="font-size:22px;font-weight:800;color:var(--text);margin:0">5</h2>
+              <p class="kpi-delta neutral" style="font-size:11px;color:var(--muted);margin-top:2px">หมวดหมู่</p>
+            </div>
+            <div class="kpi-card" style="border-top:4px solid #22a06b;background:var(--surface);border-radius:12px;padding:14px 18px">
+              <p class="kpi-label" style="font-size:11.5px;color:var(--muted);margin-bottom:4px">จำนวนสินค้ารวม</p>
+              <h2 class="kpi-value" id="prodKpiQty" style="font-size:22px;font-weight:800;color:var(--text);margin:0">220</h2>
+              <p class="kpi-delta neutral" style="font-size:11px;color:var(--muted);margin-top:2px">หน่วยรวม</p>
+            </div>
+            <div class="kpi-card" style="border-top:4px solid #f4a259;background:var(--surface);border-radius:12px;padding:14px 18px">
+              <p class="kpi-label" style="font-size:11.5px;color:var(--muted);margin-bottom:4px">รายการสินค้าทั้งหมด</p>
+              <h2 class="kpi-value" id="prodKpiCount" style="font-size:22px;font-weight:800;color:var(--text);margin:0">5</h2>
+              <p class="kpi-delta neutral" style="font-size:11px;color:var(--muted);margin-top:2px">รายการ</p>
+            </div>
+          </div>
+
+          <!-- Products Filter Bar -->
+          <div class="filter-bar" style="margin-top:14px">
+            <div class="filter-search-wrap">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+              <input id="prodSrchInp" type="text" placeholder="ค้นหาชื่อสินค้า, หมวดหมู่…" oninput="applyProductFilters()" />
+            </div>
+            <select id="prodCatFilter" onchange="applyProductFilters()" class="filter-sel">
+              <option value="">ทุกหมวดหมู่สินค้า</option>
+            </select>
+            <button class="btn-ghost" onclick="openCategoryManagerModal()" style="white-space:nowrap;padding:7px 14px;border-radius:10px;font-size:12.5px">
+              🏷️ จัดการหมวดหมู่
+            </button>
+          </div>
+
+          <!-- Products Data Table -->
+          <div class="card" style="padding:0;overflow:hidden;margin-top:14px">
+            <div class="table-topbar">
+              <span id="prodTableCount" class="table-info-txt">แสดง 0 รายการสินค้า</span>
+            </div>
+            <div class="tbl-wrap">
+              <table class="data-tbl">
+                <thead>
+                  <tr>
+                    <th class="text-c" style="width:60px">รูปภาพ</th>
+                    <th>ชื่อสินค้า & หมวดหมู่</th>
+                    <th class="text-c">จำนวนสต็อก</th>
+                    <th class="text-r">ราคาสินค้าหน้าร้าน (POS)</th>
+                    <th class="text-r">ราคาขายออนไลน์</th>
+                    <th class="text-r">ส่วนลด (Discount)</th>
+                    <th class="text-r">ราคาสุทธิหน้าร้าน</th>
+                    <th class="text-c">จัดการ</th>
+                  </tr>
+                </thead>
+                <tbody id="productsTableBody"></tbody>
+              </table>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+      <!-- Modal: Add / Edit Product with Image Upload -->
+      <div class="modal-backdrop" id="productModal">
+        <div class="modal-card" style="max-width:680px">
+          <div class="modal-head">
+            <h3 id="prodModalTitle">➕ เพิ่มสินค้าใหม่</h3>
+            <button class="modal-close" onclick="closeModal('productModal')">✕</button>
+          </div>
+          <form id="productForm" onsubmit="saveProductSubmit(event)">
+            <input type="hidden" id="prodEditId" value="" />
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>ชื่อสินค้า <span style="color:var(--red)">*</span></label>
+                <input id="prodNameInp" type="text" class="form-inp" required placeholder="เช่น ข้าวสารหอมมะลิ 5 กก." />
+              </div>
+              <div class="form-field">
+                <label>SKU / รหัสสินค้า (ไม่จำเป็นต้องระบุ)</label>
+                <input id="prodSkuInp" type="text" class="form-inp" placeholder="ระบบรันรหัสให้อัตโนมัติ" />
+              </div>
+            </div>
+
+            <!-- Product Image Upload / URL Row -->
+            <div class="form-field" style="margin-bottom:14px">
+              <label>🖼️ รูปภาพสินค้า (URL หรือ อัปโหลดจากเครื่อง)</label>
+              <div style="display:flex;gap:10px;align-items:center">
+                <img id="prodImgPreview" src="" style="width:54px;height:54px;object-fit:cover;border-radius:8px;border:1px solid #cbd5e1;display:none;background:#f8fafc" alt="Preview" />
+                <div style="flex:1;display:flex;flex-direction:column;gap:6px">
+                  <input id="prodImgInp" type="text" class="form-inp" placeholder="ระบุ URL รูปภาพ เช่น https://example.com/item.jpg" oninput="previewProductImage(this.value)" />
+                  <div style="display:flex;align-items:center;gap:8px">
+                    <label class="btn-ghost" style="padding:4px 10px;font-size:11.5px;cursor:pointer;border:1px dashed var(--border)">
+                      📁 เลือกไฟล์ภาพจากเครื่อง...
+                      <input type="file" id="prodImgFileInp" accept="image/*" style="display:none" onchange="handleProductImageUpload(event)" />
+                    </label>
+                    <span id="prodImgFileName" style="font-size:11px;color:var(--muted)"></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>หมวดหมู่สินค้า</label>
+                <select id="prodCatInp" class="form-inp">
+                  <option value="เสื้อยืด">👕 เสื้อยืด</option>
+                  <option value="หมวก">🧢 หมวก</option>
+                  <option value="เสื้อโปโล">👔 เสื้อโปโล</option>
+                  <option value="ฮูดดี้">🧥 ฮูดดี้</option>
+                  <option value="Food">🍔 อาหาร (Food)</option>
+                  <option value="ทั่วไป" selected>📦 สินค้าทั่วไป</option>
+                </select>
+              </div>
+              <div class="form-field">
+                <label>จำนวนสต็อกคงเหลือ <span style="color:var(--red)">*</span></label>
+                <input id="prodQtyInp" type="number" class="form-inp" required min="0" value="10" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>🏪 ราคาสินค้าหน้าร้าน POS (บาท) <span style="color:var(--red)">*</span></label>
+                <input id="prodPosPriceInp" type="number" step="0.01" class="form-inp" required placeholder="0.00" value="280" />
+              </div>
+              <div class="form-field">
+                <label>🌐 ราคาขายออนไลน์ (บาท)</label>
+                <input id="prodOnlinePriceInp" type="number" step="0.01" class="form-inp" placeholder="0.00" value="320" />
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-field">
+                <label>🏷️ ส่วนลดสินค้าหน้าร้าน (บาท)</label>
+                <input id="prodDiscountInp" type="number" step="0.01" class="form-inp" placeholder="0.00" value="0" />
+              </div>
+              <div class="form-field">
+                <label>ไอคอนสำรอง</label>
+                <input id="prodIconInp" type="text" class="form-inp" placeholder="เช่น 👕, 🧢, 🍔" value="📦" />
+              </div>
+            </div>
+
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:18px">
+              <button type="button" class="btn-ghost" onclick="closeModal('productModal')">ยกเลิก</button>
+              <button type="submit" class="btn-accent">💾 บันทึกสินค้า</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Modal: Category Management (เพิ่ม/แก้ไข/ลบ หมวดหมู่สินค้า) -->
+      <div class="modal-backdrop" id="categoryModal">
+        <div class="modal-card" style="max-width:540px">
+          <div class="modal-head">
+            <h3>🏷️ จัดการหมวดหมู่สินค้า</h3>
+            <button class="modal-close" onclick="closeModal('categoryModal')">✕</button>
+          </div>
+          <div style="padding:20px 28px">
+            <!-- Add New Category Form -->
+            <div style="display:flex;gap:10px;margin-bottom:20px">
+              <input id="newCatNameInp" type="text" class="form-inp" placeholder="พิมพ์ชื่อหมวดหมู่ใหม่ เช่น เครื่องดื่ม, อาหาร" style="flex:1" />
+              <button class="btn-accent" onclick="addNewCategorySubmit()">➕ เพิ่มหมวดหมู่</button>
+            </div>
+
+            <h4 style="font-size:13px;color:var(--muted);margin-bottom:10px">รายการหมวดหมู่ทั้งหมด</h4>
+            <div id="categoryListContainer" style="display:flex;flex-direction:column;gap:8px;max-height:280px;overflow-y:auto">
+              <!-- Dynamically populated category rows -->
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- ─── VIEW: SETTINGS (ตั้งค่าระบบ 3 เมนูหลัก) ─── -->
+      <div class="view" id="view-settings">
+        <div class="content">
+
+          <!-- Tabs Navigation -->
+          <div class="settings-nav-tabs">
+            <button class="st-tab active" onclick="switchSettingsTab('users', this)">
+              <span class="st-tab-icon">👥</span>
+              <div class="st-tab-txt">
+                <strong>1. ตั้งค่าผู้ใช้งาน & สิทธิ์</strong>
+                <span>เพิ่ม user, กำหนดบทบาทและสิทธิ์การเข้าถึง</span>
+              </div>
+            </button>
+            <button class="st-tab" onclick="switchSettingsTab('linebot', this)">
+              <span class="st-tab-icon">💬</span>
+              <div class="st-tab-txt">
+                <strong>2. LINE Bot & แจ้งเตือน</strong>
+                <span>ตั้งค่า Token, Webhook และการแจ้งเตือนสต็อก</span>
+              </div>
+            </button>
+            <button class="st-tab" onclick="switchSettingsTab('backup', this)">
+              <span class="st-tab-icon">💾</span>
+              <div class="st-tab-txt">
+                <strong>3. สำรองข้อมูล (Backup)</strong>
+                <span>ส่งออก JSON/CSV และการนำเข้าคืนค่าข้อมูล</span>
+              </div>
+            </button>
+            <button class="st-tab" onclick="switchSettingsTab('autoupdate', this)">
+              <span class="st-tab-icon">🚀</span>
+              <div class="st-tab-txt">
+                <strong>4. ระบบอัปเดตอัตโนมัติ (Auto-Update Channel)</strong>
+                <span>ตรวจสอบเวอร์ชันใหม่ ซิงค์และอัปเดตผ่าน Cloud / GitHub</span>
+              </div>
+            </button>
+          </div>
+
+          <!-- Section 1: Users & Permissions -->
+          <div class="st-section active" id="st-sec-users">
+            <div class="card-header-bar">
+              <div>
+                <h3>👥 จัดการผู้ใช้งานและสิทธิ์การเข้าถึง</h3>
+                <p class="sub-txt">จัดการผู้ใช้ในระบบ กำหนดบทบาทสิทธิ์ (Administrator, Manager, Staff)</p>
+              </div>
+              <button class="btn-accent" onclick="openUserModal()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                เพิ่มผู้ใช้งาน
+              </button>
+            </div>
+
+            <div class="card" style="padding:0;overflow:hidden">
+              <div class="tbl-wrap">
+                <table class="data-tbl">
+                  <thead>
+                    <tr>
+                      <th>User ID</th>
+                      <th>ผู้ใช้งาน</th>
+                      <th>อีเมล</th>
+                      <th>บทบาทสิทธิ์ (Role)</th>
+                      <th class="text-c">สถานะ</th>
+                      <th class="text-c">จัดการ</th>
+                    </tr>
+                  </thead>
+                  <tbody id="userTableBody"></tbody>
+                </table>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 2: LINE Bot -->
+          <div class="st-section" id="st-sec-linebot">
+            <div class="card" style="margin-bottom:16px">
+              <h3>💬 ตั้งค่า LINE Messaging API & Notify</h3>
+              <p class="sub-txt" style="margin-bottom:18px">เชื่อมต่อ LINE Official Account หรือ Notify เพื่อรับการแจ้งเตือนสต็อกแบบ Real-time</p>
+              
+              <div class="form-row">
+                <div class="form-field">
+                  <label>LINE Channel Access Token</label>
+                  <input id="lineToken" class="form-inp" type="password" placeholder="eyJhbGciOiJIUzI1Ni..." value="LINE_ACCESS_TOKEN_SAMPLE_2026" />
+                </div>
+                <div class="form-field">
+                  <label>LINE Channel Secret</label>
+                  <input id="lineSecret" class="form-inp" type="password" placeholder="abcdef0123456789..." value="0123456789abcdef" />
+                </div>
+              </div>
+
+              <div class="form-field">
+                <label>Webhook URL (สำหรับคัดลอกไปใส่ใน LINE Developers Console)</label>
+                <div class="inp-copy-wrap">
+                  <input id="lineWebhook" class="form-inp" readonly value="https://devtai-shop.com/api/line-webhook" />
+                  <button class="btn-ghost" onclick="copyLineWebhook()">📋 คัดลอก</button>
+                </div>
+              </div>
+
+              <div style="display:flex;gap:10px;margin-top:16px">
+                <button class="btn-accent" onclick="saveLineConfig()">💾 บันทึกการตั้งค่า LINE</button>
+                <button class="btn-ghost" onclick="testLineNotify()">🔔 ทดสอบส่งข้อความแจ้งเตือน</button>
+              </div>
+            </div>
+
+            <div class="card">
+              <h3>🔔 เงื่อนไขการส่งการแจ้งเตือนไปยัง LINE</h3>
+              <div class="checkbox-group" style="margin-top:12px;display:flex;flex-direction:column;gap:12px">
+                <label class="cb-label">
+                  <input type="checkbox" checked id="cbAlertLowStock" />
+                  <span>แจ้งเตือนทันทีเมื่อสินค้าในคลังมีจำนวน <strong>ต่ำกว่า 10 ชิ้น</strong></span>
+                </label>
+                <label class="cb-label">
+                  <input type="checkbox" checked id="cbAlertStockIn" />
+                  <span>แจ้งเตือนเมื่อมีการบันทึก <strong>"รับสินค้าเข้าคลัง"</strong> ใหม่</span>
+                </label>
+                <label class="cb-label">
+                  <input type="checkbox" checked id="cbAlertDailySummary" />
+                  <span>ส่งข้อความ <strong>สรุปยอดขายและสต็อกคงเหลือประจำวัน</strong> (เวลา 18:00 น.)</span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 3: Data Backup & Restore -->
+          <div class="st-section" id="st-sec-backup">
+            <div class="card-grid-2">
+
+              <div class="card">
+                <h3>📥 สำรองข้อมูลระบบ (Export Backup)</h3>
+                <p class="sub-txt" style="margin-bottom:16px">ดาวน์โหลดข้อมูลสต็อกและจุดจัดเก็บทั้งหมดเก็บไว้เพื่อความปลอดภัย</p>
+                <div style="display:flex;flex-direction:column;gap:10px">
+                  <button class="btn-accent btn-full-width" onclick="exportDataJSON()">
+                    <span>💾 ดาวน์โหลดไฟล์สำรองข้อมูล (.JSON)</span>
+                  </button>
+                  <button class="btn-ghost btn-full-width" onclick="exportStockCSV()">
+                    <span>📊 ส่งออกประวัติเคลื่อนไหวสต็อก (.CSV)</span>
+                  </button>
+                </div>
+              </div>
+
+              <div class="card">
+                <h3>📤 คืนค่าข้อมูล (Import Restore)</h3>
+                <p class="sub-txt" style="margin-bottom:16px">นำเข้าไฟล์ `.JSON` ที่เคยสำรองไว้เพื่อคืนค่าระบบ</p>
+                <div class="drop-zone" id="backupDropZone" onclick="triggerImportFile()">
+                  <div class="dz-icon">📂</div>
+                  <div class="dz-text">คลิกเพื่อเลือกไฟล์ `.JSON` สำรองข้อมูล</div>
+                  <input type="file" id="importFileInp" accept=".json" style="display:none" onchange="handleImportFile(event)" />
+                </div>
+              </div>
+
+            </div>
+
+            <div class="card" style="margin-top:16px">
+              <h3>⏱️ ตั้งค่าการสำรองข้อมูลอัตโนมัติ (Auto Backup)</h3>
+              <div class="form-row" style="margin-top:12px">
+                <div class="form-field">
+                  <label>รอบการสำรองข้อมูลอัตโนมัติ</label>
+                  <select id="autoBackupInterval" class="form-inp">
+                    <option value="daily">ทุกวัน (Daily at midnight)</option>
+                    <option value="weekly">ทุกสัปดาห์ (Every Sunday)</option>
+                    <option value="monthly">ทุกเดือน (1st of Month)</option>
+                  </select>
+                </div>
+                <div class="form-field" style="display:flex;align-items:flex-end">
+                  <button class="btn-accent" onclick="saveAutoBackupConfig()">บันทึกการตั้งค่าสำรองข้อมูล</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Section 4: Auto-Updater Channel -->
+          <div class="st-section" id="st-sec-autoupdate">
+            <div class="card" style="padding:22px">
+              <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+                <div style="display:flex;align-items:center;gap:12px">
+                  <span style="font-size:32px">🚀</span>
+                  <div>
+                    <h3 style="margin:0;font-size:16px">ระบบอัปเดตซอฟต์แวร์อัตโนมัติ (Auto-Update Channel)</h3>
+                    <span style="font-size:12px;color:var(--muted)">เชื่อมต่อช่องทางอัปเดตเวอร์ชันใหม่ล่าสุดผ่าน Cloud Server / GitHub Releases</span>
+                  </div>
+                </div>
+                <span class="badge b-in" style="font-size:12px;padding:5px 12px" id="appVersionBadge">เวอร์ชันปัจจุบัน: v1.0.0</span>
+              </div>
+
+              <div style="background:var(--light);border-radius:12px;padding:16px;margin-bottom:18px">
+                <div class="form-field" style="margin-bottom:12px">
+                  <label>🔗 URL ช่องทางตรวจสอบไฟล์อัปเดต (Update Server / GitHub JSON)</label>
+                  <input id="updateServerUrlInp" type="text" class="form-inp" value="https://raw.githubusercontent.com/devtai/smart-stock-pos/main/latest.json" placeholder="https://yourdomain.com/updates/latest.json" />
+                </div>
+                <div style="display:flex;gap:12px;align-items:center">
+                  <button class="btn-accent" onclick="checkForAppUpdates()">
+                    🔍 ตรวจสอบเวอร์ชันใหม่ตอนนี้
+                  </button>
+                  <span id="updateCheckStatus" style="font-size:12.5px;color:var(--muted)"></span>
+                </div>
+              </div>
+
+              <!-- Update Result Box -->
+              <div id="updateResultBox" style="display:none;border:1px solid var(--border);border-radius:12px;padding:16px;background:var(--surface)">
+                <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+                  <h4 style="margin:0;color:var(--green)">🎉 พบซอฟต์แวร์เวอร์ชันใหม่ล่าสุด!</h4>
+                  <span id="newVersionBadge" class="badge b-sell">v1.0.1</span>
+                </div>
+                <p id="releaseNotesTxt" style="font-size:13px;color:var(--text);margin-bottom:12px">ปรับปรุงประสิทธิภาพการขาย POS และซิงค์สต็อกเรียลไทม์</p>
+                <button class="btn-accent" onclick="triggerAppUpdateDownload()">
+                  📥 ดาวน์โหลดและติดตั้งอัปเดตอัตโนมัติ
+                </button>
+              </div>
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </div><!-- /view-wrap -->
+  </div><!-- /main -->
+
+  <!-- ═══ MODAL: รับสินค้าเข้า / แก้ไข ═══ -->
+  <div class="modal-overlay" id="stockModal" onclick="closeModalBg(event)">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="stockModalTitle">รับสินค้าเข้าคลัง</h3>
+        <button class="modal-close-btn" onclick="closeStockModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="m-stock-id" />
+        <div class="form-row">
+          <div class="form-field"><label>ชื่อสินค้า</label><input id="m-name" class="form-inp" placeholder="ชื่อสินค้า" /></div>
+          <div class="form-field"><label>SKU / Variant</label><input id="m-sku" class="form-inp" placeholder="SKU" /></div>
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>โกดัง</label>
+            <select id="m-wh" class="form-inp">
+              <option>Bangkok Main Warehouse</option>
+              <option>Chiang Mai Warehouse</option>
+            </select>
+          </div>
+          <div class="form-field"><label>จำนวน</label><input id="m-qty" class="form-inp" type="number" placeholder="0" /></div>
+        </div>
+        <div class="form-field"><label>หมายเหตุ / อ้างอิง</label><input id="m-note" class="form-inp" placeholder="เลขที่ PO หรือหมายเหตุ" /></div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeStockModal()">ยกเลิก</button>
+        <button class="btn-accent" onclick="addStockEntry()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: เพิ่มพื้นที่จัดเก็บ / แก้ไข ═══ -->
+  <div class="modal-overlay" id="whModal" onclick="closeWHModalBg(event)">
+    <div class="modal-box">
+      <div class="modal-head">
+        <h3 id="whModalTitle">เพิ่มพื้นที่จัดเก็บสินค้า</h3>
+        <button class="modal-close-btn" onclick="closeWHModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="m-wh-id" />
+        <div class="form-row">
+          <div class="form-field">
+            <label>หมวดหมู่สินค้า</label>
+            <select id="m-wh-cat" class="form-inp">
+              <option>เสื้อยืด</option>
+              <option>หมวก</option>
+              <option>เสื้อโปโล</option>
+              <option>ฮูดดี้</option>
+            </select>
+          </div>
+          <div class="form-field">
+            <label>พื้นที่จัดเก็บ</label>
+            <input id="m-wh-loc" class="form-inp" placeholder="เช่น Bangkok WH — Zone A-01" />
+          </div>
+        </div>
+        <div class="form-field">
+          <label>ชื่อสินค้า</label>
+          <input id="m-wh-prod" class="form-inp" placeholder="ชื่อสินค้า" />
+        </div>
+        <div class="form-row">
+          <div class="form-field">
+            <label>จำนวน</label>
+            <input id="m-wh-qty" class="form-inp" type="number" min="1" placeholder="0" />
+          </div>
+          <div class="form-field">
+            <label>หน่วยนับ</label>
+            <select id="m-wh-unit" class="form-inp">
+              <option>ชิ้น</option>
+              <option>ตัว</option>
+              <option>ใบ</option>
+              <option>กล่อง</option>
+              <option>แพ็ค</option>
+            </select>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeWHModal()">ยกเลิก</button>
+        <button class="btn-accent" onclick="addStorageEntry()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: เปลี่ยนชื่อเมนู ═══ -->
+  <div class="modal-overlay" id="menuModal" onclick="closeMenuModalBg(event)">
+    <div class="modal-box" style="width:400px">
+      <div class="modal-head">
+        <h3>เปลี่ยนชื่อเมนู</h3>
+        <button class="modal-close-btn" onclick="closeMenuModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="m-menu-key" />
+        <div class="form-field">
+          <label>ชื่อเมนูใหม่</label>
+          <input id="m-menu-name" class="form-inp" placeholder="กรอกชื่อเมนูที่ต้องการ…" />
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeMenuModal()">ยกเลิก</button>
+        <button class="btn-accent" onclick="saveMenuName()">บันทึก</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: เคลียร์ข้อมูลแดชบอร์ด ═══ -->
+  <div class="modal-overlay" id="resetModal" onclick="closeResetModalBg(event)">
+    <div class="modal-box" style="width:420px">
+      <div class="modal-head">
+        <h3>🧹 จัดการข้อมูลทดสอบ</h3>
+        <button class="modal-close-btn" onclick="closeResetModal()">✕</button>
+      </div>
+      <div class="modal-body" style="gap:10px">
+        <p style="font-size:13px;color:var(--muted)">เลือกโหมดการทำงานเพื่อทดสอบระบบ:</p>
+        <button class="reset-opt-btn reset-opt--clear" onclick="clearAllData()">
+          <div class="opt-icon">🗑️</div>
+          <div class="opt-text">
+            <strong>เคลียร์ข้อมูลทั้งหมดเป็น 0</strong>
+            <span>ล้างยอดขาย, คำสั่งซื้อ, ประวัติสต็อก และพื้นที่จัดเก็บ</span>
+          </div>
+        </button>
+        <button class="reset-opt-btn reset-opt--restore" onclick="restoreSampleData()">
+          <div class="opt-icon">🔄</div>
+          <div class="opt-text">
+            <strong>รีเซ็ตเป็นข้อมูลตัวอย่างเริ่มต้น</strong>
+            <span>คืนค่าข้อมูลตัวอย่างตั้งต้นสำหรับทดสอบ</span>
+          </div>
+        </button>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeResetModal()">ปิด</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: พิมพ์ใบปะหน้าพัสดุ (Air Waybill / AWB Printer) ═══ -->
+  <div class="modal-overlay" id="printAwbModal" onclick="closeAwbModalBg(event)">
+    <div class="modal-box" style="width:480px;max-width:92vw">
+      <div class="modal-head">
+        <h3>🖨️ ตัวอย่างใบปะหน้าพัสดุ (TikTok Shop AWB)</h3>
+        <button class="modal-close-btn" onclick="closeAwbModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px;background:#f0f2f5;display:flex;justify-content:center">
+        <!-- Printable Sticker Box (100x150mm Ratio) -->
+        <div class="awb-sticker-card" id="printableAwbCard">
+          <div class="awb-head">
+            <div class="awb-brand">
+              <span style="font-size:18px">🎵</span>
+              <strong>TikTok Shop</strong>
+            </div>
+            <div class="awb-courier" id="awbCourierBadge">J&T Express</div>
+          </div>
+          
+          <div class="awb-barcode-wrap">
+            <div class="barcode-lines">||| | |||| ||| ||||| || |||||| | |||| ||| |||</div>
+            <div class="barcode-num" id="awbTrackingNum">TH0129384756</div>
+          </div>
+
+          <div class="awb-address-grid">
+            <div class="awb-sec">
+              <span class="awb-lbl">ผู้ส่ง (Sender):</span>
+              <div class="awb-txt"><strong>Devtai Shop Official</strong><br>123/45 ถนนสุขุมวิท เขตวัฒนา กทม. 10110 โทร. 081-234-5678</div>
+            </div>
+            <div class="awb-sec awb-recipient">
+              <span class="awb-lbl">ผู้รับ (Recipient):</span>
+              <div class="awb-txt"><strong id="awbRecipName">คุณสมศักดิ์ มั่นคง</strong><br><span id="awbRecipAddr">45/12 หมู่ 3 ต.ในเมือง อ.เมือง จ.เชียงใหม่ 50000</span><br>โทร. <span id="awbRecipPhone">089-876-5432</span></div>
+            </div>
+          </div>
+
+          <div class="awb-items-box">
+            <span class="awb-lbl">รายการสินค้าในพัสดุ (SKU Items):</span>
+            <div class="awb-items-list" id="awbItemList">
+              • เสื้อยืดสีดำ ไซส์ L (Qty: 2)
+            </div>
+          </div>
+
+          <div class="awb-foot">
+            <div>สั่งซื้อเลขที่: <strong id="awbOrderNum">TT-578912349012</strong></div>
+            <div style="font-weight:700">ไม่ต้องชำระเงิน (NON-COD)</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeAwbModal()">ปิด</button>
+        <button class="btn-accent" onclick="printAwbSticker()">🖨️ สั่งพิมพ์ใบปะหน้า (Print AWB)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: ใบเสร็จรับเงิน POS (Receipt Paper Modal) ═══ -->
+  <div class="modal-overlay" id="posReceiptModal" onclick="closePosReceiptModalBg(event)">
+    <div class="modal-box" style="width:380px;max-width:92vw">
+      <div class="modal-head">
+        <h3>🧾 ใบเสร็จรับเงิน (POS Receipt)</h3>
+        <button class="modal-close-btn" onclick="closePosReceiptModal()">✕</button>
+      </div>
+      <div class="modal-body" style="padding:16px;background:#f0f2f5;display:flex;justify-content:center">
+        <!-- Receipt Paper Sticker -->
+        <div class="pos-receipt-paper" id="printablePosReceipt">
+          <div class="rcp-head">
+            <h2>Devtai Shop</h2>
+            <p>123/45 ถนนสุขุมวิท เขตวัฒนา กทม. 10110<br>โทร. 081-234-5678 TAX ID: 0105562019876</p>
+            <div class="rcp-divider">--------------------------------</div>
+            <div class="rcp-meta">
+              <div>เลขที่: <strong id="rcpNum">POS-20260724-001</strong></div>
+              <div>วันที่: <span id="rcpDate">2026-07-24 12:00</span></div>
+            </div>
+            <div class="rcp-divider">--------------------------------</div>
+          </div>
+          <div class="rcp-items" id="rcpItemsList"></div>
+          <div class="rcp-divider">--------------------------------</div>
+          <div class="rcp-totals">
+            <div class="rcp-row"><span>รวมเงิน:</span><span id="rcpSubtotal">฿0.00</span></div>
+            <div class="rcp-row"><span>ส่วนลด:</span><span id="rcpDiscount">฿0.00</span></div>
+            <div class="rcp-row rcp-grand"><span>ยอดชำระสุทธิ:</span><strong id="rcpGrandTotal">฿0.00</strong></div>
+            <div class="rcp-row"><span>ชำระโดย:</span><span id="rcpPayMethod">เงินสด</span></div>
+            <div class="rcp-row" id="rcpCashRow"><span>รับเงิน:</span><span id="rcpReceived">฿0.00</span></div>
+            <div class="rcp-row" id="rcpChangeRow"><span>เงินทอน:</span><span id="rcpChange">฿0.00</span></div>
+          </div>
+          <div class="rcp-divider">--------------------------------</div>
+          <div class="rcp-foot">
+            <p>*** ขอบคุณที่อุดหนุน ***<br> Devtai Shop Stock POS System</p>
+          </div>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closePosReceiptModal()">ปิด</button>
+        <button class="btn-accent" onclick="printPosReceipt()">🖨️ พิมพ์ใบเสร็จ (Print Receipt)</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: เพิ่ม/แก้ไข ผู้ใช้งาน ═══ -->
+  <div class="modal-overlay" id="userModal" onclick="closeUserModalBg(event)">
+    <div class="modal-box" style="width:480px">
+      <div class="modal-head">
+        <h3 id="userModalTitle">➕ เพิ่มผู้ใช้งานใหม่</h3>
+        <button class="modal-close-btn" onclick="closeUserModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <input type="hidden" id="m-user-id" />
+        <div class="form-field">
+          <label>ไอดีผู้ใช้ (User ID) <span style="color:var(--red)">*</span></label>
+          <input id="m-user-userid" class="form-inp" placeholder="เช่น ADM001, STF001, cashier1" required />
+        </div>
+        <div class="form-field">
+          <label>ชื่อผู้ใช้งาน (Display Name) <span style="color:var(--red)">*</span></label>
+          <input id="m-user-name" class="form-inp" placeholder="เช่น สมชาย ใจดี" required />
+        </div>
+        <div class="form-field">
+          <label>อีเมล (Email) <span style="color:var(--red)">*</span></label>
+          <input id="m-user-email" class="form-inp" type="email" placeholder="user@devtai.com" required />
+        </div>
+        <div class="form-field">
+          <label>รหัสผ่าน (Password) <span style="color:var(--red)">*</span></label>
+          <input id="m-user-password" class="form-inp" type="password" placeholder="กำหนดรหัสผ่านเข้าใช้งาน" required />
+        </div>
+        <div class="form-field">
+          <label>กำหนดบทบาทสิทธิ์ (Role) <span style="color:var(--red)">*</span></label>
+          <select id="m-user-role" class="form-inp">
+            <option value="Administrator">👑 Administrator (ผู้ดูแลระบบ - เข้าถึงได้ทุกหน้า)</option>
+            <option value="Staff">👤 Staff / Cashier (พนักงานขาย - เข้าได้เฉพาะ POS, สินค้า, คลัง)</option>
+          </select>
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeUserModal()">ยกเลิก</button>
+        <button class="btn-accent" onclick="saveUserEntry()">💾 บันทึกข้อมูลผู้ใช้งาน</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ DEDICATED FULL-SCREEN LOGIN PAGE SCREEN ═══ -->
+  <div class="auth-overlay" id="authOverlay">
+    <div class="login-card">
+
+      <!-- Left Hero Banner -->
+      <div class="login-hero">
+        <div class="hero-brand">
+          <div class="hero-logo-icon">D</div>
+          <span>Devtai Shop</span>
+        </div>
+        <div class="hero-content">
+          <h1>ระบบจัดการสต็อก<br><span>และแดชบอร์ดอัจฉริยะ</span></h1>
+        </div>
+      </div>
+
+      <!-- Right Form Area -->
+      <div class="login-form-area">
+        <div class="login-form-header">
+          <h2>ยินดีต้อนรับเข้าสู่ระบบ</h2>
+          <p>กรุณากรอกชื่อผู้ใช้และรหัสผ่านเพื่อเข้าใช้งาน</p>
+        </div>
+
+        <!-- Login Form -->
+        <form class="auth-form" id="loginForm" onsubmit="handleLogin(event)">
+          <div class="form-field">
+            <label>ไอดีผู้ใช้ (User ID) หรือ อีเมล (Email)</label>
+            <div class="inp-with-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+              <input type="text" id="loginEmail" class="form-inp" value="admin" placeholder="เช่น admin, ADM001, staff@devtai.com" required />
+            </div>
+          </div>
+
+          <div class="form-field">
+            <label>รหัสผ่าน</label>
+            <div class="inp-with-icon">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0110 0v4"/></svg>
+              <input type="password" id="loginPassword" class="form-inp" value="admin" placeholder="admin" required />
+            </div>
+          </div>
+
+          <button type="submit" class="btn-login-submit">
+            <span>เข้าสู่ระบบ</span>
+            <svg viewBox="0 0 100 100" width="22" height="22">
+              <circle cx="50" cy="50" r="50" fill="#FF9800"/>
+              <path d="M 32 28 H 58 V 43 H 50 V 36 H 40 V 64 H 50 V 57 H 58 V 72 H 32 Z" fill="#FFF"/>
+              <path d="M 46 45 H 64 V 37 L 78 50 L 64 63 V 55 H 46 Z" fill="#FFF"/>
+            </svg>
+          </button>
+          <p class="auth-switch">ยังไม่มีบัญชี? <a href="#" onclick="toggleAuthMode('register'); return false;">สมัครสมาชิก</a></p>
+        </form>
+
+        <!-- Register Form -->
+        <form class="auth-form hidden" id="registerForm" onsubmit="handleRegister(event)">
+          <div class="form-field">
+            <label>ชื่อผู้ใช้งาน (Display Name)</label>
+            <input type="text" id="regName" class="form-inp" placeholder="devtai code" required />
+          </div>
+          <div class="form-field">
+            <label>อีเมล (Email)</label>
+            <input type="email" id="regEmail" class="form-inp" placeholder="name@devtai.com" required />
+          </div>
+          <div class="form-field">
+            <label>รหัสผ่าน (Password)</label>
+            <input type="password" id="regPassword" class="form-inp" placeholder="อย่างน้อย 6 ตัวอักษร" minlength="6" required />
+          </div>
+          <button type="submit" class="btn-accent btn-full">สมัครสมาชิก</button>
+          <p class="auth-switch">มีบัญชีอยู่แล้ว? <a href="#" onclick="toggleAuthMode('login'); return false;">เข้าสู่ระบบ</a></p>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ═══ MODAL: ตั้งค่า Firebase ═══ -->
+  <div class="modal-overlay" id="fbModal" onclick="closeFBModalBg(event)">
+    <div class="modal-box" style="width:450px">
+      <div class="modal-head">
+        <h3>🔥 ตั้งค่า Firebase Realtime Database</h3>
+        <button class="modal-close-btn" onclick="closeFBModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size:12.5px;color:var(--muted)">กรอก Firebase Config ของคุณเพื่อเชื่อมต่อส่งข้อมูลแบบ Real-time ข้ามอุปกรณ์:</p>
+        <div class="form-field">
+          <label>API Key</label>
+          <input id="fb-apiKey" class="form-inp" placeholder="AIzaSy..." />
+        </div>
+        <div class="form-field">
+          <label>Database URL</label>
+          <input id="fb-dbUrl" class="form-inp" placeholder="https://your-app.firebaseio.com" />
+        </div>
+        <div class="form-field">
+          <label>Project ID</label>
+          <input id="fb-projectId" class="form-inp" placeholder="your-project-id" />
+        </div>
+      </div>
+      <div class="modal-foot">
+        <button class="btn-ghost" onclick="closeFBModal()">ยกเลิก</button>
+        <button class="btn-accent" onclick="saveFirebaseConfig()">บันทึก & เชื่อมต่อ</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Toast -->
+  <div class="toast" id="toast"></div>
+
+  <script src="firebase-service.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

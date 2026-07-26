@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Devtai Shop — แดชบอร์ด</title>
+  <meta name="description" content="ภาพรวมสรุปรายงานยอดขาย Devtai Shop" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Thai:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <link rel="stylesheet" href="simple.css" />
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-top">
+      <div class="logo">
+        <div class="logo-dot"></div>
+        <span class="logo-name">Devtai <strong>Shop</strong></span>
+      </div>
+      <button class="collapse-btn" id="collapseBtn" title="ย่อเมนู">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M15 18l-6-6 6-6"/></svg>
+      </button>
+    </div>
+
+    <nav class="nav">
+      <a href="dashboard.html" class="nav-link active" id="nl-dash">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
+        <span>แดชบอร์ด</span>
+      </a>
+      <a href="index.html" class="nav-link" id="nl-stock">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect x="2" y="7" width="20" height="14" rx="2"/><path d="M16 3H8l-2 4h12l-2-4z"/></svg>
+        <span>ประวัติสต็อก</span>
+      </a>
+      <a href="#" class="nav-link">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/></svg>
+        <span>สินค้า</span>
+      </a>
+      <a href="#" class="nav-link">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>
+        <span>คำสั่งซื้อ</span>
+      </a>
+      <a href="#" class="nav-link">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+        <span>ลูกค้า</span>
+      </a>
+
+      <div class="nav-divider"></div>
+
+      <a href="#" class="nav-link">
+        <svg class="ni" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
+        <span>ตั้งค่า</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-user">
+      <img src="https://ui-avatars.com/api/?name=devtai&background=e8e8e8&color=555&size=64" class="user-av" alt="user" />
+      <div class="user-info">
+        <p class="user-name">devtai code</p>
+        <p class="user-role">Admin</p>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main -->
+  <div class="main" id="main">
+
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <p class="page-label">แดชบอร์ด</p>
+        <h1 class="page-title">ภาพรวมธุรกิจ</h1>
+      </div>
+      <div class="topbar-right">
+        <div class="period-group" id="periodGroup">
+          <button class="period-btn active" onclick="switchPeriod('today',this)">วันนี้</button>
+          <button class="period-btn" onclick="switchPeriod('week',this)">7 วัน</button>
+          <button class="period-btn" onclick="switchPeriod('month',this)">30 วัน</button>
+        </div>
+        <button class="icon-btn" id="themeBtn" title="สลับธีม">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
+        </button>
+        <button class="icon-btn" title="แจ้งเตือน" style="position:relative">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+          <span class="notif-dot"></span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Content -->
+    <div class="content">
+
+      <!-- KPI Row -->
+      <div class="kpi-row">
+        <div class="kpi">
+          <p class="kpi-label">ยอดขายรวม</p>
+          <h2 class="kpi-value" id="kv-rev">฿48,250</h2>
+          <p class="kpi-delta up" id="kd-rev">↑ 12.4% จากเมื่อวาน</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">คำสั่งซื้อ</p>
+          <h2 class="kpi-value" id="kv-ord">134</h2>
+          <p class="kpi-delta up" id="kd-ord">↑ 8.1% จากเมื่อวาน</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">สินค้าทั้งหมด</p>
+          <h2 class="kpi-value" id="kv-pro">286 SKU</h2>
+          <p class="kpi-delta neutral" id="kd-pro">2 คลังสินค้า</p>
+        </div>
+        <div class="kpi">
+          <p class="kpi-label">ลูกค้าใหม่</p>
+          <h2 class="kpi-value" id="kv-cus">28</h2>
+          <p class="kpi-delta up" id="kd-cus">↑ 5.3% จากเมื่อวาน</p>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-row">
+
+        <!-- Donut -->
+        <div class="card">
+          <p class="card-title">ยอดขายตามหมวดหมู่</p>
+          <div class="donut-wrap">
+            <canvas id="donutChart"></canvas>
+            <div class="donut-center">
+              <p class="donut-total" id="donutTotal">฿312k</p>
+              <p class="donut-sub">รวม</p>
+            </div>
+          </div>
+          <div class="donut-legend" id="donutLegend"></div>
+        </div>
+
+        <!-- Line -->
+        <div class="card card--wide">
+          <div class="card-header">
+            <p class="card-title">แนวโน้มยอดขาย</p>
+            <div class="chart-pills">
+              <span class="pill" style="--c:#4a90d9">● ยอดขาย</span>
+              <span class="pill" style="--c:#f4a259">● ออเดอร์</span>
+            </div>
+          </div>
+          <div class="line-wrap">
+            <canvas id="lineChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Bottom Row -->
+      <div class="bottom-row">
+
+        <!-- Top products -->
+        <div class="card">
+          <p class="card-title">สินค้าขายดี</p>
+          <div class="prod-list" id="prodList"></div>
+        </div>
+
+        <!-- Recent orders -->
+        <div class="card card--wide">
+          <div class="card-header">
+            <p class="card-title">คำสั่งซื้อล่าสุด</p>
+            <a href="#" class="link-btn">ดูทั้งหมด →</a>
+          </div>
+          <table class="simple-table" id="ordersTable">
+            <thead>
+              <tr>
+                <th>เลขที่</th>
+                <th>ลูกค้า</th>
+                <th>ยอด</th>
+                <th>สถานะ</th>
+                <th>วันที่</th>
+              </tr>
+            </thead>
+            <tbody id="ordersBody"></tbody>
+          </table>
+        </div>
+
+      </div>
+
+    </div><!-- /content -->
+  </div><!-- /main -->
+
+<script src="simple.js"></script>
+</body>
+</html>
