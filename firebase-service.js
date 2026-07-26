@@ -87,8 +87,8 @@ class FirebaseService {
     if (online) {
       if (badgeEl) {
         badgeEl.className = 'fb-badge online';
-        badgeEl.innerHTML = '<span class="fb-dot"></span> Firebase 🟢';
-        badgeEl.title = 'Firebase Realtime: เชื่อมต่อสำเร็จและซิงค์ข้อมูลเรียลไทม์';
+        badgeEl.innerHTML = '<span class="fb-dot"></span> เรียลไทม์ 🟢';
+        badgeEl.title = 'สถานะ: เชื่อมต่อสมบูรณ์และรับส่งข้อมูลเรียลไทม์ 🟢';
       }
       if (statusEl) {
         statusEl.innerHTML = '🟢 เชื่อมต่อคลาวด์สำเร็จและรับส่งข้อมูลเรียลไทม์ (Realtime Online)';
@@ -97,8 +97,8 @@ class FirebaseService {
     } else {
       if (badgeEl) {
         badgeEl.className = 'fb-badge offline';
-        badgeEl.innerHTML = '<span class="fb-dot"></span> Firebase 🟠';
-        badgeEl.title = 'Firebase Realtime: ไม่มีการเชื่อมต่อ หรือ ตัดการเชื่อมต่อ (Offline)';
+        badgeEl.innerHTML = '<span class="fb-dot"></span> เรียลไทม์ 🟠';
+        badgeEl.title = 'สถานะ: ไม่มีการเชื่อมต่อ หรือ ตัดการเชื่อมต่อ 🟠';
       }
       if (statusEl) {
         if (this.config) {

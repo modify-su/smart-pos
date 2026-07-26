@@ -88,13 +88,20 @@ function loadRealtimeStorage(initial = true) {
   }
 }
 
-function updateRealtimeStatusBadge(active = true) {
+function updateRealtimeStatusBadge() {
   const badge = document.getElementById('fbStatusBadge');
-  if (badge) {
-    badge.className = active ? 'fb-badge online' : 'fb-badge offline';
-    badge.innerHTML = active
-      ? '<span class="fb-dot" style="background:#10b981;box-shadow:0 0 8px #10b981"></span> เรียลไทม์ 🟢'
-      : '<span class="fb-dot"></span> ออฟไลน์ 🟠';
+  if (!badge) return;
+
+  const isConnected = (typeof fbService !== 'undefined' && fbService.isConnected);
+
+  if (isConnected) {
+    badge.className = 'fb-badge online';
+    badge.innerHTML = '<span class="fb-dot"></span> เรียลไทม์ 🟢';
+    badge.title = 'สถานะ: เชื่อมต่อสำเร็จและซิงค์ข้อมูลเรียลไทม์ 🟢';
+  } else {
+    badge.className = 'fb-badge offline';
+    badge.innerHTML = '<span class="fb-dot"></span> เรียลไทม์ 🟠';
+    badge.title = 'สถานะ: ไม่มีการเชื่อมต่อ หรือ ตัดการเชื่อมต่อ 🟠';
   }
 }
 
