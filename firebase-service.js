@@ -4,13 +4,13 @@
 
 // ── Default / Demo Firebase Config (Editable via UI) ──
 const DEFAULT_FIREBASE_CONFIG = {
-  apiKey: "AIzaSyDemoConfigKeyForDevtaiShop2026",
-  authDomain: "devtai-shop.firebaseapp.com",
-  databaseURL: "https://devtai-shop-default-rtdb.firebaseio.com",
-  projectId: "devtai-shop",
-  storageBucket: "devtai-shop.appspot.com",
-  messagingSenderId: "123456789012",
-  appId: "1:123456789012:web:demo1234567890"
+  apiKey: "AIzaSyAIvmdh75hY4nTezqTS18GLB47NtxWE9zM",
+  authDomain: "smart-pos-3bfbd.firebaseapp.com",
+  databaseURL: "https://smart-pos-3bfbd-default-rtdb.asia-southeast1.firebasedatabase.app",
+  projectId: "smart-pos-3bfbd",
+  storageBucket: "smart-pos-3bfbd.firebasestorage.app",
+  messagingSenderId: "1051791600985",
+  appId: "1:1051791600985:web:f7ad3dcc1fc47aeea73048"
 };
 
 class FirebaseService {
