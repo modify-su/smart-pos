@@ -130,6 +130,25 @@ class FirebaseService {
     if (typeof onAuthStatusChanged === 'function') onAuthStatusChanged(null);
   }
 
+  // ── Realtime Sync: Products List ──
+  listenProducts(callback) {
+    if (!this.db) return;
+    const prodRef = this.db.ref('products_list');
+    prodRef.on('value', (snap) => {
+      const val = snap.val();
+      if (val) {
+        let list = Array.isArray(val) ? val : Object.keys(val).map(k => ({ id: k, ...val[k] }));
+        callback(list);
+      }
+    });
+  }
+
+  saveProductsToFirebase(products) {
+    if (this.db && this.isConnected) {
+      this.db.ref('products_list').set(products);
+    }
+  }
+
   // ── Realtime Sync: Stock Movements ──
   listenStock(callback) {
     if (!this.db) return;

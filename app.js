@@ -46,6 +46,10 @@ function saveRealtimeStorage(broadcast = true) {
     localStorage.setItem(STORAGE_KEYS.MOVEMENTS, JSON.stringify(DB.stock));
     localStorage.setItem(STORAGE_KEYS.STORAGE, JSON.stringify(DB.storage));
 
+    if (typeof fbService !== 'undefined' && fbService.isConnected) {
+      fbService.saveProductsToFirebase(PRODUCTS_LIST);
+    }
+
     if (broadcast && realtimeChannel) {
       realtimeChannel.postMessage({ type: 'SYNC_DATA', timestamp: Date.now() });
     }
@@ -1382,6 +1386,15 @@ function saveFirebaseConfig() {
 
 function initFirebaseRealtime() {
   if (typeof fbService === 'undefined') return;
+
+  fbService.listenProducts((remoteProducts) => {
+    if (remoteProducts && Array.isArray(remoteProducts) && remoteProducts.length) {
+      PRODUCTS_LIST = remoteProducts;
+      if (typeof applyProductFilters === 'function') applyProductFilters();
+      if (typeof renderPosProducts === 'function') renderPosProducts();
+    }
+  });
+
   fbService.listenStock((remoteStock) => {
     if (remoteStock && remoteStock.length) {
       DB.stock = remoteStock;
