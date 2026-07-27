@@ -2003,11 +2003,15 @@ function deleteProduct(id) {
 }
 
 // ═══════════════════════════════════════════════════════════
-//  CATEGORY MANAGEMENT SYSTEM (เพิ่ม, แก้ไข ✏️, ลบ 🗑️ หมวดหมู่สินค้า)
+//  CATEGORY MANAGEMENT SYSTEM (เพิ่ม, แก้ไข ✏️, ลบ 🗑️ หมวดหมู่สินค้า & โปรโมชั่น)
 // ═══════════════════════════════════════════════════════════
 let PRODUCT_CATEGORIES = JSON.parse(localStorage.getItem('SMART_STOCK_CATEGORIES')) || [
-  'เสื้อยืด', 'หมวก', 'เสื้อโปโล', 'ฮูดดี้', 'อาหาร', 'ทั่วไป'
+  'โปรโมชั่น', 'เสื้อยืด', 'หมวก', 'เสื้อโปโล', 'ฮูดดี้', 'อาหาร', 'ทั่วไป'
 ];
+
+if (!PRODUCT_CATEGORIES.includes('โปรโมชั่น')) {
+  PRODUCT_CATEGORIES.unshift('โปรโมชั่น');
+}
 
 function saveCategoriesStorage() {
   localStorage.setItem('SMART_STOCK_CATEGORIES', JSON.stringify(PRODUCT_CATEGORIES));
@@ -2019,19 +2023,28 @@ function renderCategoryDropdowns() {
   if (filterSel) {
     const currentVal = filterSel.value;
     filterSel.innerHTML = `<option value="">ทุกหมวดหมู่สินค้า</option>` +
-      PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${c === currentVal ? 'selected' : ''}>📦 ${c}</option>`).join('');
+      PRODUCT_CATEGORIES.map(c => {
+        const icon = c.includes('โปรโมชั่น') ? '🏷️' : '📦';
+        return `<option value="${c}" ${c === currentVal ? 'selected' : ''}>${icon} ${c}</option>`;
+      }).join('');
   }
 
   const formSel = document.getElementById('prodCatInp');
   if (formSel) {
     const currentFormVal = formSel.value;
-    formSel.innerHTML = PRODUCT_CATEGORIES.map(c => `<option value="${c}" ${c === currentFormVal ? 'selected' : ''}>📦 ${c}</option>`).join('');
+    formSel.innerHTML = PRODUCT_CATEGORIES.map(c => {
+      const icon = c.includes('โปรโมชั่น') ? '🏷️' : '📦';
+      return `<option value="${c}" ${c === currentFormVal ? 'selected' : ''}>${icon} ${c}</option>`;
+    }).join('');
   }
 
   const posPills = document.getElementById('posCatPills');
   if (posPills) {
     posPills.innerHTML = `<button class="pos-pill active" onclick="filterPosCat('all', this)">ทั้งหมด</button>` +
-      PRODUCT_CATEGORIES.map(c => `<button class="pos-pill" onclick="filterPosCat('${c}', this)">${c}</button>`).join('');
+      PRODUCT_CATEGORIES.map(c => {
+        const icon = c.includes('โปรโมชั่น') ? '🏷️ ' : '';
+        return `<button class="pos-pill" onclick="filterPosCat('${c}', this)">${icon}${c}</button>`;
+      }).join('');
   }
 }
 
@@ -2044,15 +2057,18 @@ function renderCategoryListUI() {
   const container = document.getElementById('categoryListContainer');
   if (!container) return;
 
-  container.innerHTML = PRODUCT_CATEGORIES.map((cat) => `
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--light);border-radius:10px;border:1px solid var(--border)">
-      <span style="font-size:13.5px;font-weight:600;color:var(--text)">📦 ${cat}</span>
-      <div style="display:flex;gap:6px">
-        <button class="btn-act btn-act--edit" onclick="editCategoryName('${cat}')">✏️ แก้ไข</button>
-        ${cat !== 'ทั่วไป' ? `<button class="btn-act btn-act--del" onclick="deleteCategory('${cat}')">🗑️ ลบ</button>` : ''}
+  container.innerHTML = PRODUCT_CATEGORIES.map((cat) => {
+    const icon = cat.includes('โปรโมชั่น') ? '🏷️' : '📦';
+    return `
+      <div style="display:flex;align-items:center;justify-content:space-between;padding:10px 14px;background:var(--light);border-radius:10px;border:1px solid var(--border)">
+        <span style="font-size:13.5px;font-weight:600;color:var(--text)">${icon} ${cat}</span>
+        <div style="display:flex;gap:6px">
+          <button class="btn-act btn-act--edit" onclick="editCategoryName('${cat}')">✏️ แก้ไข</button>
+          ${cat !== 'ทั่วไป' ? `<button class="btn-act btn-act--del" onclick="deleteCategory('${cat}')">🗑️ ลบ</button>` : ''}
+        </div>
       </div>
-    </div>
-  `).join('');
+    `;
+  }).join('');
 }
 
 function addNewCategorySubmit() {
