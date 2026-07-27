@@ -153,10 +153,21 @@
         <button class="icon-btn" id="themeBtn" title="สลับธีม">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/></svg>
         </button>
-        <button class="icon-btn" style="position:relative">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
-          <span class="notif-dot"></span>
-        </button>
+        <div class="notif-dropdown-wrap">
+          <button class="icon-btn" id="notifBellBtn" onclick="toggleNotifDropdown(event)" title="การแจ้งเตือนระบบ">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>
+            <span class="notif-badge-count" id="notifBadgeCount">0</span>
+          </button>
+          <div class="notif-dropdown" id="notifDropdown">
+            <div class="notif-header">
+              <div style="font-size:13px;font-weight:700;color:var(--text)">🔔 การแจ้งเตือนระบบ</div>
+              <button class="btn-ghost" onclick="clearAllNotifications()" style="font-size:11px;padding:2px 8px;border-radius:6px">ล้างทั้งหมด</button>
+            </div>
+            <div class="notif-list" id="notifListContainer">
+              <!-- Dynamically populated notification items -->
+            </div>
+          </div>
+        </div>
         <div class="topbar-avatar" id="topbarAvatar">
           <img src="https://ui-avatars.com/api/?name=Admin&background=ff9800&color=fff&size=64" id="userAvImg" class="av-img" alt="user" />
           <span class="av-name" id="userDisplayName">ผู้ดูแลระบบ (Admin)</span>

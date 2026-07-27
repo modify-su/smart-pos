@@ -898,6 +898,109 @@ function setupTheme() {
 }
 
 // ═══════════════════════════════════════════════════════════
+//  SYSTEM NOTIFICATIONS CENTER (แจ้งเตือน เพิ่มสินค้า, ขายสินค้า, แก้ไข, เข้าระบบ, โปรโมชั่น)
+// ═══════════════════════════════════════════════════════════
+let SYSTEM_NOTIFICATIONS = JSON.parse(localStorage.getItem('SMART_STOCK_NOTIFS_V1')) || [
+  { id: 1, type: 'login', title: '🔑 เข้าระบบสำเร็จ', desc: 'เข้าใช้งานระบบในฐานะ ผู้ดูแลระบบ (Admin)', icon: '🔑', time: 'วันนี้ 09:00', unread: true },
+  { id: 2, type: 'promo', title: '🏷️ อัปเดตโปรโมชั่นใหม่', desc: 'เพิ่มเงื่อนไขส่วนลดโปรโมชั่นสินค้า', icon: '🏷️', time: 'วันนี้ 10:15', unread: true },
+  { id: 3, type: 'add_prod', title: '➕ เพิ่มสินค้าใหม่ในคลัง', desc: 'เพิ่มรายการสินค้าสำเร็จพร้อมวางจำหน่าย', icon: '📦', time: 'วันนี้ 11:30', unread: true }
+];
+
+function saveNotificationsStorage() {
+  localStorage.setItem('SMART_STOCK_NOTIFS_V1', JSON.stringify(SYSTEM_NOTIFICATIONS));
+  renderNotificationUI();
+}
+
+function addNotification(type, title, desc, icon = '🔔') {
+  const now = new Date();
+  const timeStr = `${now.getHours().toString().padStart(2,'0')}:${now.getMinutes().toString().padStart(2,'0')}`;
+  const dateStr = `${now.getDate()}/${now.getMonth()+1}`;
+
+  const newItem = {
+    id: Date.now(),
+    type,
+    title,
+    desc,
+    icon,
+    time: `${dateStr} ${timeStr} น.`,
+    unread: true
+  };
+
+  SYSTEM_NOTIFICATIONS.unshift(newItem);
+  if (SYSTEM_NOTIFICATIONS.length > 50) SYSTEM_NOTIFICATIONS.pop();
+  saveNotificationsStorage();
+}
+
+function renderNotificationUI() {
+  const badge = document.getElementById('notifBadgeCount');
+  const container = document.getElementById('notifListContainer');
+
+  const unreadCount = SYSTEM_NOTIFICATIONS.filter(n => n.unread).length;
+  if (badge) {
+    if (unreadCount > 0) {
+      badge.textContent = unreadCount > 99 ? '99+' : unreadCount;
+      badge.classList.add('active');
+    } else {
+      badge.classList.remove('active');
+    }
+  }
+
+  if (container) {
+    if (!SYSTEM_NOTIFICATIONS.length) {
+      container.innerHTML = `
+        <div style="text-align:center;padding:32px 16px;color:var(--muted)">
+          <div style="font-size:32px;margin-bottom:6px">🔕</div>
+          <div style="font-size:12.5px">ไม่มีรายการแจ้งเตือนใหม่</div>
+        </div>
+      `;
+      return;
+    }
+
+    container.innerHTML = SYSTEM_NOTIFICATIONS.map(n => `
+      <div class="notif-item ${n.unread ? 'unread' : ''}">
+        <div class="notif-item-icon">${n.icon}</div>
+        <div class="notif-item-body">
+          <div class="notif-item-title">${n.title}</div>
+          <div class="notif-item-desc">${n.desc}</div>
+          <div class="notif-item-time">⏰ ${n.time}</div>
+        </div>
+      </div>
+    `).join('');
+  }
+}
+
+function toggleNotifDropdown(e) {
+  if (e) e.stopPropagation();
+  const dropdown = document.getElementById('notifDropdown');
+  if (!dropdown) return;
+
+  const isOpen = dropdown.classList.contains('open');
+  if (!isOpen) {
+    dropdown.classList.add('open');
+    SYSTEM_NOTIFICATIONS.forEach(n => n.unread = false);
+    saveNotificationsStorage();
+  } else {
+    dropdown.classList.remove('open');
+  }
+}
+
+function clearAllNotifications() {
+  SYSTEM_NOTIFICATIONS = [];
+  saveNotificationsStorage();
+  showToast('🧹 ล้างรายการแจ้งเตือนทั้งหมดเรียบร้อยแล้ว');
+}
+
+document.addEventListener('click', function(e) {
+  const dropdown = document.getElementById('notifDropdown');
+  const btn = document.getElementById('notifBellBtn');
+  if (dropdown && dropdown.classList.contains('open')) {
+    if (!dropdown.contains(e.target) && (!btn || !btn.contains(e.target))) {
+      dropdown.classList.remove('open');
+    }
+  }
+});
+
+// ═══════════════════════════════════════════════════════════
 //  TOAST
 // ═══════════════════════════════════════════════════════════
 function showToast(msg, ms=2500) {
@@ -1259,6 +1362,7 @@ function handleLogin(e) {
       overlay.style.display = 'none';
     }
 
+    addNotification('login', '🔑 เข้าสู่ระบบสำเร็จ', `ผู้ใช้ ${displayName} (${currentUserRole === 'admin' ? 'Admin' : 'Staff'}) เข้าสู่ระบบ`, '🔑');
     showToast(`🟢 เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${displayName} (${currentUserRole === 'admin' ? 'Admin' : 'Staff'})`);
   } catch (err) {
     console.error('Login error:', err);
@@ -2335,6 +2439,10 @@ function saveProductSubmit(e) {
           color: diff > 0 ? '#5cc8a0' : '#f9d56e'
         });
       }
+      addNotification('edit_prod', '✏️ แก้ไขข้อมูลสินค้า', `อัปเดตข้อมูลสินค้า "${name}" (สต็อก: ${qty} ชิ้น)`, '📝');
+      if (promoDetail) {
+        addNotification('promo', '🏷️ แจ้งเตือนโปรโมชั่น', `สินค้า "${name}": ${promoDetail}`, '🏷️');
+      }
       showToast(`✏️ อัปเดตสินค้า "${name}" เรียบร้อยแล้ว`);
     }
   } else {
@@ -2361,6 +2469,10 @@ function saveProductSubmit(e) {
       color: '#5cc8a0'
     });
 
+    addNotification('add_prod', '➕ เพิ่มสินค้าใหม่', `เพิ่มสินค้า "${name}" จำนวน ${qty} ชิ้น`, '📦');
+    if (promoDetail) {
+      addNotification('promo', '🏷️ แจ้งเตือนโปรโมชั่น', `สินค้า "${name}": ${promoDetail}`, '🏷️');
+    }
     showToast(`🎉 เพิ่มสินค้าใหม่ "${name}" เรียบร้อยแล้ว`);
   }
 
@@ -2740,6 +2852,8 @@ function checkoutPosOrder() {
   renderPosProducts();
   saveRealtimeStorage();
 
+  addNotification('sell_pos', '🛒 ขายสินค้า POS สำเร็จ', `ขายสินค้าสำเร็จ รวม ฿${grandTotal.toLocaleString('en-US',{minimumFractionDigits:2})} (${posCart.length} รายการ)`, '💰');
+
   // Populate Printable Receipt Modal
   document.getElementById('rcpNum').textContent = rcpNum;
   document.getElementById('rcpDate').textContent = nowStr;
@@ -2802,6 +2916,7 @@ document.addEventListener('DOMContentLoaded', () => {
   loadRealtimeStorage();
   checkSavedAuth();
   applyUserRolePermissions(false);
+  renderNotificationUI();
   initDashboard();
   applyPeriodKPI('today');
   initFirebaseRealtime();
