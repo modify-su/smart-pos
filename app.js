@@ -1913,7 +1913,7 @@ function openAddProductModal() {
 }
 
 function openEditProductModal(id) {
-  const p = PRODUCTS_LIST.find(x => x.id == id);
+  const p = PRODUCTS_LIST.find(x => String(x.id) === String(id));
   if (!p) {
     showToast('⚠️ ไม่พบข้อมูลสินค้า');
     return;
@@ -1959,13 +1959,13 @@ function openEditProductModal(id) {
 }
 
 function deleteProduct(id) {
-  const p = PRODUCTS_LIST.find(x => x.id == id);
+  const p = PRODUCTS_LIST.find(x => String(x.id) === String(id));
   if (!p) {
     showToast('⚠️ ไม่พบข้อมูลสินค้าที่ต้องการลบ');
     return;
   }
   if (confirm(`คุณต้องการลบสินค้า "${p.name}" หรือไม่?`)) {
-    PRODUCTS_LIST = PRODUCTS_LIST.filter(x => x.id != id);
+    PRODUCTS_LIST = PRODUCTS_LIST.filter(x => String(x.id) !== String(id));
     saveRealtimeStorage();
     applyProductFilters();
     if (posInited) renderPosProducts();
@@ -2162,8 +2162,8 @@ function renderProductsTable(dataList) {
         <td class="text-r"><strong style="color:#6c5ce7;font-size:14px">฿${netPosPrice.toFixed(2)}</strong></td>
         <td class="text-c">
           <div style="display:flex;gap:6px;justify-content:center">
-            <button class="btn-act btn-act--edit" onclick="openEditProductModal(${p.id})">✏️ แก้ไข</button>
-            <button class="btn-act btn-act--del" onclick="deleteProduct(${p.id})">🗑️ ลบ</button>
+            <button class="btn-act btn-act--edit" onclick="openEditProductModal('${p.id}')">✏️ แก้ไข</button>
+            <button class="btn-act btn-act--del" onclick="deleteProduct('${p.id}')">🗑️ ลบ</button>
           </div>
         </td>
       </tr>
@@ -2216,40 +2216,6 @@ function closeModal(id) {
   }
 }
 
-function openAddProductModal() {
-  document.getElementById('prodModalTitle').textContent = '➕ เพิ่มสินค้าใหม่';
-  document.getElementById('prodEditId').value = '';
-  document.getElementById('productForm').reset();
-  const nameEl = document.getElementById('prodImgFileName');
-  if (nameEl) nameEl.textContent = '';
-  previewProductImage('');
-  openModal('productModal');
-}
-
-function openEditProductModal(id) {
-  const p = PRODUCTS_LIST.find(x => x.id === id);
-  if (!p) return;
-
-  document.getElementById('prodModalTitle').textContent = '✏️ แก้ไขข้อมูลสินค้า';
-  document.getElementById('prodEditId').value = p.id;
-  document.getElementById('prodNameInp').value = p.name;
-  if (document.getElementById('prodSkuInp')) document.getElementById('prodSkuInp').value = p.sku || '';
-  document.getElementById('prodCatInp').value = p.cat;
-  document.getElementById('prodQtyInp').value = p.qty;
-  document.getElementById('prodIconInp').value = p.icon || '📦';
-  document.getElementById('prodPosPriceInp').value = p.posPrice;
-  document.getElementById('prodOnlinePriceInp').value = p.onlinePrice || 0;
-  document.getElementById('prodDiscountInp').value = p.discount || 0;
-
-  const imgInp = document.getElementById('prodImgInp');
-  if (imgInp) {
-    imgInp.value = p.image || '';
-    previewProductImage(p.image || '');
-  }
-
-  openModal('productModal');
-}
-
 function saveProductSubmit(e) {
   e.preventDefault();
   const editId = document.getElementById('prodEditId').value;
@@ -2264,7 +2230,7 @@ function saveProductSubmit(e) {
   const discount = parseFloat(document.getElementById('prodDiscountInp').value) || 0;
 
   if (editId) {
-    const p = PRODUCTS_LIST.find(x => x.id == editId);
+    const p = PRODUCTS_LIST.find(x => String(x.id) === String(editId));
     if (p) {
       const oldQty = p.qty || 0;
       const diff = qty - oldQty;
@@ -2495,22 +2461,22 @@ function applyQuickCash(val) {
 }
 
 function updatePosCartItemQty(prodId, delta) {
-  const item = posCart.find(x => x.id === prodId);
+  const item = posCart.find(x => String(x.id) === String(prodId));
   if (!item) return;
-  const p = PRODUCTS_LIST.find(x => x.id === prodId);
+  const p = PRODUCTS_LIST.find(x => String(x.id) === String(prodId));
   if (delta > 0 && p && item.qty + delta > p.qty) {
     showToast(`⚠️ สินค้า "${item.name}" เหลือในคลังเพียง ${p.qty} ชิ้น`);
     return;
   }
   item.qty += delta;
   if (item.qty <= 0) {
-    posCart = posCart.filter(x => x.id !== prodId);
+    posCart = posCart.filter(x => String(x.id) !== String(prodId));
   }
   renderPosCart();
 }
 
 function removePosCartItem(prodId) {
-  posCart = posCart.filter(x => x.id !== prodId);
+  posCart = posCart.filter(x => String(x.id) !== String(prodId));
   renderPosCart();
 }
 
@@ -2571,7 +2537,7 @@ function renderPosProducts() {
 }
 
 function addToPosCart(prodId) {
-  const p = PRODUCTS_LIST.find(x => x.id === prodId);
+  const p = PRODUCTS_LIST.find(x => String(x.id) === String(prodId));
   if (!p) return;
 
   if (p.qty <= 0) {
@@ -2581,7 +2547,7 @@ function addToPosCart(prodId) {
 
   const netPrice = Math.max(0, p.posPrice - (p.discount || 0));
 
-  const exist = posCart.find(x => x.id === prodId);
+  const exist = posCart.find(x => String(x.id) === String(prodId));
   if (exist) {
     if (exist.qty + 1 > p.qty) {
       showToast(`⚠️ สินค้า "${p.name}" เหลือในคลังเพียง ${p.qty} ชิ้น`);
