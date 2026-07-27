@@ -1936,6 +1936,9 @@ function openAddProductModal() {
   const nameEl = document.getElementById('prodImgFileName');
   if (nameEl) nameEl.textContent = '';
 
+  const promoEl = document.getElementById('prodPromoDetailInp');
+  if (promoEl) promoEl.value = '';
+
   previewProductImage('');
   openModal('productModal');
 }
@@ -1976,6 +1979,9 @@ function openEditProductModal(id) {
 
   const discountEl = document.getElementById('prodDiscountInp');
   if (discountEl) discountEl.value = p.discount || 0;
+
+  const promoDetailEl = document.getElementById('prodPromoDetailInp');
+  if (promoDetailEl) promoDetailEl.value = p.promoDetail || '';
 
   const imgInp = document.getElementById('prodImgInp');
   if (imgInp) {
@@ -2192,7 +2198,10 @@ function renderProductsTable(dataList) {
         <td>
           <div>
             <strong style="font-size:13.5px;display:block">${p.name}</strong>
-            <span class="badge b-in" style="font-size:10px;padding:1px 6px">${p.cat}</span>
+            <div style="display:flex;align-items:center;gap:6px;margin-top:3px;flex-wrap:wrap">
+              <span class="badge b-in" style="font-size:10px;padding:1px 6px">${p.cat}</span>
+              ${p.promoDetail ? `<span class="badge b-move" style="font-size:10.5px;padding:1px 6px;background:rgba(255,152,0,0.12);color:#e65100;border:1px solid rgba(255,152,0,0.3)">🏷️ ${p.promoDetail}</span>` : ''}
+            </div>
           </div>
         </td>
         <td class="text-c">
@@ -2272,6 +2281,7 @@ function saveProductSubmit(e) {
   const posPrice = parseFloat(document.getElementById('prodPosPriceInp').value) || 0;
   const onlinePrice = parseFloat(document.getElementById('prodOnlinePriceInp').value) || 0;
   const discount = parseFloat(document.getElementById('prodDiscountInp').value) || 0;
+  const promoDetail = document.getElementById('prodPromoDetailInp')?.value.trim() || '';
 
   if (editId) {
     const p = PRODUCTS_LIST.find(x => String(x.id) === String(editId));
@@ -2287,6 +2297,7 @@ function saveProductSubmit(e) {
       p.posPrice = posPrice;
       p.onlinePrice = onlinePrice;
       p.discount = discount;
+      p.promoDetail = promoDetail;
 
       if (diff !== 0) {
         DB.stock.unshift({
@@ -2312,7 +2323,7 @@ function saveProductSubmit(e) {
     PRODUCTS_LIST.unshift({
       id: newId,
       sku,
-      name, cat, qty, icon, image, posPrice, onlinePrice, discount
+      name, cat, qty, icon, image, posPrice, onlinePrice, discount, promoDetail
     });
 
     DB.stock.unshift({
@@ -2571,6 +2582,7 @@ function renderPosProducts() {
         </div>
         <div class="ent-card-img-box">${imgContent}</div>
         <div class="ent-card-title">${p.name}</div>
+        ${p.promoDetail ? `<div style="font-size:10.5px;color:#e65100;background:rgba(255,152,0,0.12);padding:2px 6px;border-radius:4px;margin-top:2px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis" title="${p.promoDetail}">🏷️ ${p.promoDetail}</div>` : ''}
         <div class="ent-card-foot">
           <span class="ent-card-price">${(p.posPrice || 0).toLocaleString()}</span>
           <span class="ent-card-stock">สต็อก: ${p.qty}</span>
