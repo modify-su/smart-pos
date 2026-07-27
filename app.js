@@ -2099,22 +2099,41 @@ function addNewCategorySubmit() {
 }
 
 function editCategoryName(oldName) {
-  const newName = prompt(`แก้ไขชื่อหมวดหมู่ "${oldName}" เป็น:`, oldName);
-  if (!newName || !newName.trim() || newName.trim() === oldName) return;
+  const oldInp = document.getElementById('editCatOldNameInp');
+  const newInp = document.getElementById('editCatNewNameInp');
+  if (oldInp) oldInp.value = oldName;
+  if (newInp) newInp.value = oldName;
+  openModal('editCategoryModal');
+}
 
-  const trimmed = newName.trim();
+function saveEditCategorySubmit(e) {
+  if (e) e.preventDefault();
+  const oldName = document.getElementById('editCatOldNameInp')?.value || '';
+  const newName = document.getElementById('editCatNewNameInp')?.value?.trim() || '';
+
+  if (!newName) {
+    showToast('⚠️ กรุณาระบุชื่อหมวดหมู่สินค้า');
+    return;
+  }
+
+  if (newName === oldName) {
+    closeModal('editCategoryModal');
+    return;
+  }
+
   const idx = PRODUCT_CATEGORIES.indexOf(oldName);
   if (idx !== -1) {
-    PRODUCT_CATEGORIES[idx] = trimmed;
+    PRODUCT_CATEGORIES[idx] = newName;
     PRODUCTS_LIST.forEach(p => {
-      if (p.cat === oldName) p.cat = trimmed;
+      if (p.cat === oldName) p.cat = newName;
     });
     saveCategoriesStorage();
     renderCategoryListUI();
     applyProductFilters();
     if (posInited) renderPosProducts();
     saveRealtimeStorage();
-    showToast(`✏️ อัปเดตชื่อหมวดหมู่เป็น "${trimmed}" เรียบร้อยแล้ว`);
+    closeModal('editCategoryModal');
+    showToast(`✏️ อัปเดตชื่อหมวดหมู่เป็น "${newName}" เรียบร้อยแล้ว`);
   }
 }
 

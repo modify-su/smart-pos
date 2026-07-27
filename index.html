@@ -659,6 +659,27 @@
         </div>
       </div>
 
+      <!-- Modal: Edit Category Name Pop-up -->
+      <div class="modal-backdrop" id="editCategoryModal">
+        <div class="modal-card" style="max-width:440px">
+          <div class="modal-head">
+            <h3>✏️ แก้ไขชื่อหมวดหมู่สินค้า</h3>
+            <button class="modal-close" onclick="closeModal('editCategoryModal')">✕</button>
+          </div>
+          <form onsubmit="saveEditCategorySubmit(event)" style="padding:20px 24px">
+            <input type="hidden" id="editCatOldNameInp" value="" />
+            <div class="form-field">
+              <label>ชื่อหมวดหมู่สินค้า <span style="color:var(--red)">*</span></label>
+              <input id="editCatNewNameInp" type="text" class="form-inp" required placeholder="กรอกชื่อหมวดหมู่ใหม่" />
+            </div>
+            <div style="display:flex;gap:10px;justify-content:flex-end;margin-top:20px">
+              <button type="button" class="btn-ghost" onclick="closeModal('editCategoryModal')">ยกเลิก</button>
+              <button type="submit" class="btn-accent">💾 บันทึกเปลี่ยนชื่อ</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
       <!-- ─── VIEW: SETTINGS (ตั้งค่าระบบ 3 เมนูหลัก) ─── -->
       <div class="view" id="view-settings">
         <div class="content">
