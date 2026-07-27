@@ -1309,7 +1309,9 @@ function logoutUser(e) {
     if (typeof e.preventDefault === 'function') e.preventDefault();
     if (typeof e.stopPropagation === 'function') e.stopPropagation();
   }
-  if (typeof fbService !== 'undefined') fbService.logout();
+  if (typeof fbService !== 'undefined' && typeof fbService.logout === 'function') {
+    try { fbService.logout(); } catch(err){}
+  }
   try {
     localStorage.removeItem('devtai-user');
     localStorage.setItem('devtai-logged-out', 'true');
@@ -1319,6 +1321,8 @@ function logoutUser(e) {
   if (overlay) {
     overlay.classList.remove('hidden');
     overlay.style.display = 'flex';
+    overlay.style.opacity = '1';
+    overlay.style.pointerEvents = 'all';
   }
 
   const loginForm = document.getElementById('loginForm');
