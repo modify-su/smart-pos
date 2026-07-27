@@ -1418,44 +1418,55 @@ function handleLogin(e) {
 
   try {
     const inputUser = document.getElementById('loginEmail')?.value?.trim() || '';
+    const inputPass = document.getElementById('loginPassword')?.value?.trim() || '';
 
     if (!inputUser) {
       showToast('⚠️ กรุณากรอก ไอดีผู้ใช้ หรือ อีเมล');
       return false;
     }
 
+    if (!inputPass) {
+      showToast('⚠️ กรุณากรอก รหัสผ่าน');
+      return false;
+    }
+
+    // Ensure USERS_LIST is loaded
+    if (!USERS_LIST || !USERS_LIST.length) {
+      USERS_LIST = loadUsersFromStorage();
+    }
+
+    // Search for user account matching User ID or Email
     const foundUser = USERS_LIST.find(u => 
       (u.userId && u.userId.toLowerCase() === inputUser.toLowerCase()) || 
       (u.email && u.email.toLowerCase() === inputUser.toLowerCase())
     );
 
-    let role = 'Administrator';
-    let displayName = inputUser;
-    let email = inputUser.includes('@') ? inputUser : `${inputUser}@devtai.com`;
+    // Validate if user exists
+    if (!foundUser) {
+      showToast('⚠️ ไม่พบชื่อผู้ใช้หรืออีเมลนี้ในระบบ กรุณาตรวจสอบอีกครั้ง');
+      return false;
+    }
 
-    if (foundUser) {
-      displayName = foundUser.name;
-      email = foundUser.email || email;
-      role = foundUser.role;
-      if (foundUser.role === 'Staff' || foundUser.role === 'Staff / Cashier') {
-        currentUserRole = 'staff';
-      } else {
-        currentUserRole = 'admin';
-      }
+    // Validate password
+    if (foundUser.password && foundUser.password !== inputPass) {
+      showToast('⚠️ รหัสผ่านไม่ถูกต้อง กรุณาตรวจสอบอีกครั้ง');
+      return false;
+    }
+
+    // Login successful
+    let role = foundUser.role || 'Administrator';
+    let displayName = foundUser.name || inputUser;
+    let email = foundUser.email || `${inputUser}@devtai.com`;
+
+    if (role === 'Staff' || role === 'Staff / Cashier') {
+      currentUserRole = 'staff';
     } else {
-      if (inputUser.toLowerCase().includes('staff') || inputUser.toLowerCase().includes('cashier')) {
-        role = 'Staff';
-        displayName = 'พนักงานขาย (Staff)';
-        currentUserRole = 'staff';
-      } else {
-        currentUserRole = 'admin';
-        displayName = (inputUser === 'admin' || !inputUser) ? 'ผู้ดูแลระบบ (Admin)' : inputUser;
-      }
+      currentUserRole = 'admin';
     }
 
     localStorage.setItem('user_role', currentUserRole);
     localStorage.removeItem('devtai-logged-out');
-    const userObj = { displayName, email, role, userId: foundUser?.userId || inputUser };
+    const userObj = { displayName, email, role, userId: foundUser.userId || inputUser };
 
     if (typeof fbService !== 'undefined') {
       fbService.currentUser = userObj;
@@ -1475,11 +1486,7 @@ function handleLogin(e) {
     showToast(`🟢 เข้าสู่ระบบสำเร็จ ยินดีต้อนรับ ${displayName} (${currentUserRole === 'admin' ? 'Admin' : 'Staff'})`);
   } catch (err) {
     console.error('Login error:', err);
-    const overlay = document.getElementById('authOverlay');
-    if (overlay) {
-      overlay.classList.remove('hidden');
-      overlay.style.display = 'flex';
-    }
+    showToast('⚠️ เกิดข้อผิดพลาดในการตรวจสอบสิทธิ์เข้าสู่ระบบ');
   }
   return false;
 }
@@ -1488,7 +1495,27 @@ async function handleRegister(e) {
   if (e) e.preventDefault();
   const name = document.getElementById('regName')?.value.trim() || 'User';
   const email = document.getElementById('regEmail')?.value.trim() || 'user@devtai.com';
-  const userInfo = { displayName: name, email };
+  const password = document.getElementById('regPassword')?.value || '123456';
+
+  if (!USERS_LIST || !USERS_LIST.length) {
+    USERS_LIST = loadUsersFromStorage();
+  }
+
+  const userId = email.split('@')[0] || `user${Date.now().toString().slice(-4)}`;
+  const newUser = {
+    id: Date.now(),
+    userId,
+    name,
+    email,
+    password,
+    role: 'Administrator',
+    status: 'Active'
+  };
+
+  USERS_LIST.push(newUser);
+  saveUsersToStorage();
+
+  const userInfo = { displayName: name, email, role: 'Administrator', userId };
   try {
     localStorage.setItem('devtai-user', JSON.stringify(userInfo));
     localStorage.removeItem('devtai-logged-out');
