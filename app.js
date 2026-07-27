@@ -248,13 +248,120 @@ function closeMobileSidebar() {
 // ═══════════════════════════════════════════════════════════
 //  DASHBOARD
 // ═══════════════════════════════════════════════════════════
-const CATS = [
-  { name:'เสื้อยืด',   pct:0, rev:0, c:'#e8637a' },
-  { name:'หมวก',      pct:0, rev:0, c:'#f4a259' },
-  { name:'เสื้อโปโล', pct:0, rev:0, c:'#f9d56e' },
-  { name:'ฮูดดี้',    pct:0, rev:0, c:'#5cc8a0' },
-  { name:'อื่นๆ',     pct:0, rev:0, c:'#4a90d9' },
-];
+const CAT_COLORS = ['#f4a259', '#e8637a', '#5cc8a0', '#f9d56e', '#4a90d9', '#a29bfe', '#fd79a8', '#00cec9', '#6c5ce7'];
+
+function updateCategoryStatsAndDonut() {
+  const categories = (typeof PRODUCT_CATEGORIES !== 'undefined' && PRODUCT_CATEGORIES.length)
+    ? PRODUCT_CATEGORIES
+    : ['โปรโมชั่น', 'เสื้อยืด', 'หมวก', 'เสื้อโปโล', 'ฮูดดี้', 'ทั่วไป'];
+
+  let catTotals = {};
+  let totalOverallValue = 0;
+
+  categories.forEach(cat => catTotals[cat] = 0);
+
+  PRODUCTS_LIST.forEach(p => {
+    const catName = p.cat || 'ทั่วไป';
+    const val = (parseFloat(p.posPrice) || 0) * (parseInt(p.qty) || 0);
+    if (catTotals[catName] !== undefined) {
+      catTotals[catName] += val;
+    } else {
+      catTotals[catName] = val;
+    }
+    totalOverallValue += val;
+  });
+
+  DB.stock.forEach(r => {
+    if (r.type === 'ขายสินค้า' && r.qty < 0) {
+      const p = PRODUCTS_LIST.find(x => x.sku === r.variant || x.name === r.name);
+      const catName = p ? p.cat : 'ทั่วไป';
+      const saleVal = Math.abs(r.qty) * (p ? p.posPrice : 100);
+      if (catTotals[catName] !== undefined) catTotals[catName] += saleVal;
+      totalOverallValue += saleVal;
+    }
+  });
+
+  const catKeys = Object.keys(catTotals);
+  let computedCATS = catKeys.map((cat, idx) => {
+    const val = catTotals[cat];
+    const pct = totalOverallValue > 0 ? Math.round((val / totalOverallValue) * 100) : 0;
+    return {
+      name: cat,
+      val: val,
+      pct: pct,
+      c: CAT_COLORS[idx % CAT_COLORS.length]
+    };
+  });
+
+  if (totalOverallValue === 0 && PRODUCTS_LIST.length > 0) {
+    let catCounts = {};
+    catKeys.forEach(c => catCounts[c] = 0);
+    PRODUCTS_LIST.forEach(p => {
+      const c = p.cat || 'ทั่วไป';
+      catCounts[c] = (catCounts[c] || 0) + 1;
+    });
+    const totalProds = PRODUCTS_LIST.length;
+    computedCATS.forEach(c => {
+      c.pct = Math.round(((catCounts[c.name] || 0) / totalProds) * 100);
+    });
+  }
+
+  const donutLabel = document.getElementById('donutTotalLabel');
+  if (donutLabel) {
+    if (totalOverallValue >= 1000000) {
+      donutLabel.textContent = `฿${(totalOverallValue / 1000000).toFixed(1)}M`;
+    } else if (totalOverallValue >= 1000) {
+      donutLabel.textContent = `฿${(totalOverallValue / 1000).toFixed(0)}k`;
+    } else {
+      donutLabel.textContent = `฿${totalOverallValue.toLocaleString()}`;
+    }
+  }
+
+  const ctx = document.getElementById('donutChart');
+  if (ctx) {
+    if (donutChart) {
+      donutChart.data.labels = computedCATS.map(c => c.name);
+      donutChart.data.datasets[0].data = computedCATS.map(c => c.pct > 0 ? c.pct : 1);
+      donutChart.data.datasets[0].backgroundColor = computedCATS.map(c => c.c);
+      donutChart.update();
+    } else {
+      donutChart = new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+          labels: computedCATS.map(c => c.name),
+          datasets: [{
+            data: computedCATS.map(c => c.pct > 0 ? c.pct : 1),
+            backgroundColor: computedCATS.map(c => c.c),
+            borderWidth: 3,
+            borderColor: getSurfaceColor(),
+            hoverOffset: 6,
+          }]
+        },
+        options: {
+          responsive: false, cutout: '65%',
+          plugins: {
+            legend: { display: false },
+            tooltip: { callbacks: { label: c => ` ${c.label}: ${computedCATS[c.dataIndex].pct}%` } }
+          },
+          animation: { animateRotate: true, duration: 800 }
+        }
+      });
+    }
+  }
+
+  const leg = document.getElementById('donutLegend');
+  if (leg) {
+    leg.innerHTML = computedCATS.map(c => `
+      <div class="dl-row">
+        <div class="dl-left"><span class="dl-dot" style="background:${c.c}"></span><span class="dl-name">${c.name}</span></div>
+        <span class="dl-pct">${c.pct}%</span>
+      </div>`).join('');
+  }
+}
+
+function renderDonut() {
+  updateCategoryStatsAndDonut();
+}
 
 const PERIODS = {
   today: {
@@ -303,6 +410,8 @@ function refreshDashboardFromDB() {
   const sdEl  = document.getElementById('kd-stk');
   if (stkEl) stkEl.textContent = DB.totalMovements;
   if (sdEl)  sdEl.textContent  = `ยอดสต็อกสุทธิ ${DB.totalQty >= 0 ? '+' : ''}${DB.totalQty} ชิ้น`;
+
+  updateCategoryStatsAndDonut();
 
   // Recent stock (last 5 rows)
   const body = document.getElementById('recentStockBody');
