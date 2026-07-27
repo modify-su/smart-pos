@@ -688,8 +688,8 @@ function renderStockTable() {
       </td>
       <td class="text-c">
         <div class="btn-act-wrap">
-          <button class="btn-act btn-act--edit" onclick="editStockEntry(${r.id})" title="แก้ไข">✏️ แก้ไข</button>
-          <button class="btn-act btn-act--delete" onclick="deleteStockEntry(${r.id})" title="ลบ">🗑️ ลบ</button>
+          <button class="btn-act btn-act--edit" onclick="editStockEntry('${r.id}')" title="แก้ไข">✏️ แก้ไข</button>
+          <button class="btn-act btn-act--delete" onclick="deleteStockEntry('${r.id}')" title="ลบ">🗑️ ลบ</button>
         </div>
       </td>
     </tr>`;
@@ -762,19 +762,21 @@ function closeModalBg(e) {
 }
 
 function editStockEntry(id) {
-  const item = DB.stock.find(r => r.id === id);
+  const item = DB.stock.find(r => String(r.id) === String(id));
   if (item) openStockModal(item);
 }
 
 function deleteStockEntry(id) {
-  const idx = DB.stock.findIndex(r => r.id == id);
+  const idx = DB.stock.findIndex(r => String(r.id) === String(id));
   if (idx !== -1) {
     const item = DB.stock[idx];
     DB.stock.splice(idx, 1);
-    if (typeof fbService !== 'undefined') fbService.deleteStock(id);
+    saveRealtimeStorage();
     applyFilters();
     refreshDashboardFromDB();
     showToast(`🗑️ ลบรายการ "${item.name}" เรียบร้อยแล้ว`);
+  } else {
+    showToast('⚠️ ไม่พบรายการประวัติสต็อกที่ต้องการลบ');
   }
 }
 
@@ -789,7 +791,7 @@ function addStockEntry() {
   if (!name || !sku || isNaN(qty)) { showToast('⚠️ กรุณากรอกข้อมูลให้ครบถ้วน'); return; }
 
   if (editId) {
-    const item = DB.stock.find(r => r.id == editId);
+    const item = DB.stock.find(r => String(r.id) === String(editId));
     if (item) {
       item.name = name;
       item.variant = sku;
@@ -797,7 +799,7 @@ function addStockEntry() {
       item.wcode = wh === 'Bangkok Main Warehouse' ? 'WH-BKK' : 'WH-CNX';
       item.qty = +qty;
       item.note = note;
-      if (typeof fbService !== 'undefined') fbService.updateStock(editId, item);
+      saveRealtimeStorage();
       showToast(`✓ อัปเดตรายการ "${name}" แล้ว`);
     }
   } else {
@@ -813,14 +815,13 @@ function addStockEntry() {
       wcode:    wh==='Bangkok Main Warehouse'?'WH-BKK':'WH-CNX',
       type:     qty >= 0 ? 'รับเข้า' : 'ขายสินค้า',
       qty:      +qty,
-      user:     (typeof fbService !== 'undefined' && fbService.currentUser?.displayName) ? fbService.currentUser.displayName : 'devtai code',
+      user:     (typeof fbService !== 'undefined' && fbService.currentUser?.displayName) ? fbService.currentUser.displayName : 'ผู้ดูแลระบบ (Admin)',
       ref:      `PO${date.replace(/-/g,'')}${String(DB.stock.length+1).padStart(3,'0')}`,
       note,
       color:    '#5cc8a0',
     };
 
     DB.stock.unshift(entry);
-    if (typeof fbService !== 'undefined') fbService.pushStock(entry);
 
     // Synchronize with PRODUCTS_LIST
     let matchedProd = PRODUCTS_LIST.find(p => p.sku === sku || p.name.toLowerCase() === name.toLowerCase());
@@ -840,6 +841,7 @@ function addStockEntry() {
       });
     }
 
+    saveRealtimeStorage();
     showToast(`✓ บันทึกรายการ "${name}" แล้ว ${qty} ชิ้น`);
   }
 
@@ -849,7 +851,6 @@ function addStockEntry() {
   if (whInited) applyWHFilters();
   if (posInited) renderPosProducts();
   refreshDashboardFromDB();
-  saveRealtimeStorage();
 }
 
 // ── Export CSV ───────────────────────────────────────────
