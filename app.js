@@ -1241,6 +1241,7 @@ function handleLogin(e) {
     }
 
     localStorage.setItem('user_role', currentUserRole);
+    localStorage.removeItem('devtai-logged-out');
     const userObj = { displayName, email, role, userId: foundUser?.userId || inputUser };
 
     if (typeof fbService !== 'undefined') {
@@ -1262,8 +1263,8 @@ function handleLogin(e) {
     console.error('Login error:', err);
     const overlay = document.getElementById('authOverlay');
     if (overlay) {
-      overlay.classList.add('hidden');
-      overlay.style.display = 'none';
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
     }
   }
   return false;
@@ -1274,7 +1275,10 @@ async function handleRegister(e) {
   const name = document.getElementById('regName')?.value.trim() || 'User';
   const email = document.getElementById('regEmail')?.value.trim() || 'user@devtai.com';
   const userInfo = { displayName: name, email };
-  try { localStorage.setItem('devtai-user', JSON.stringify(userInfo)); } catch(err){}
+  try {
+    localStorage.setItem('devtai-user', JSON.stringify(userInfo));
+    localStorage.removeItem('devtai-logged-out');
+  } catch(err){}
   onAuthStatusChanged(userInfo);
   showToast(`🎉 สมัครสมาชิกเรียบร้อยแล้ว ยินดีต้อนรับ ${name}`);
   const overlay = document.getElementById('authOverlay');
@@ -1287,7 +1291,10 @@ async function handleRegister(e) {
 function quickDemoLogin() {
   const demoUser = { displayName: 'ผู้ดูแลระบบ (Admin)', email: 'admin@devtai.com' };
   if (typeof fbService !== 'undefined') fbService.currentUser = demoUser;
-  try { localStorage.setItem('devtai-user', JSON.stringify(demoUser)); } catch(err){}
+  try {
+    localStorage.setItem('devtai-user', JSON.stringify(demoUser));
+    localStorage.removeItem('devtai-logged-out');
+  } catch(err){}
   onAuthStatusChanged(demoUser);
   const overlay = document.getElementById('authOverlay');
   if (overlay) {
@@ -1298,23 +1305,35 @@ function quickDemoLogin() {
 }
 
 function logoutUser(e) {
-  if (e) e.stopPropagation();
+  if (e) {
+    if (typeof e.preventDefault === 'function') e.preventDefault();
+    if (typeof e.stopPropagation === 'function') e.stopPropagation();
+  }
   if (typeof fbService !== 'undefined') fbService.logout();
-  try { localStorage.removeItem('devtai-user'); } catch(err){}
-  showToast('🔒 ออกจากระบบเรียบร้อยแล้ว');
+  try {
+    localStorage.removeItem('devtai-user');
+    localStorage.setItem('devtai-logged-out', 'true');
+  } catch(err){}
+
   const overlay = document.getElementById('authOverlay');
   if (overlay) {
     overlay.classList.remove('hidden');
     overlay.style.display = 'flex';
   }
+
+  const loginForm = document.getElementById('loginForm');
+  if (loginForm) loginForm.reset();
+
+  showToast('🔒 ออกจากระบบเรียบร้อยแล้ว');
 }
 
 function checkSavedAuth() {
   try {
     const saved = localStorage.getItem('devtai-user');
+    const isLoggedOut = localStorage.getItem('devtai-logged-out') === 'true';
     const overlay = document.getElementById('authOverlay');
 
-    if (saved) {
+    if (saved && !isLoggedOut) {
       const user = JSON.parse(saved);
       if (typeof fbService !== 'undefined') fbService.currentUser = user;
       onAuthStatusChanged(user);
@@ -1322,8 +1341,12 @@ function checkSavedAuth() {
         overlay.classList.add('hidden');
         overlay.style.display = 'none';
       }
+    } else if (isLoggedOut) {
+      if (overlay) {
+        overlay.classList.remove('hidden');
+        overlay.style.display = 'flex';
+      }
     } else {
-      // Default auto-login as Admin so user is never stuck on login screen
       const defaultUser = { displayName: 'ผู้ดูแลระบบ (Admin)', email: 'admin@devtai.com', role: 'Administrator' };
       try { localStorage.setItem('devtai-user', JSON.stringify(defaultUser)); } catch(err){}
       onAuthStatusChanged(defaultUser);
@@ -1335,8 +1358,8 @@ function checkSavedAuth() {
   } catch(e) {
     const overlay = document.getElementById('authOverlay');
     if (overlay) {
-      overlay.classList.add('hidden');
-      overlay.style.display = 'none';
+      overlay.classList.remove('hidden');
+      overlay.style.display = 'flex';
     }
   }
 }
